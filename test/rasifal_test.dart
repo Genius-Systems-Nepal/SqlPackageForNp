@@ -24,18 +24,18 @@ void main() async {
         'author': 'Test author',
         'lang': 'en',
         'aries': 'aries',
-        'taurus': 'null',
-        'gemini': 'null',
-        'cancer': 'null',
-        'leo': 'null',
-        'virgo': 'null',
-        'libra': 'null',
-        'scorpio': 'null',
-        'sagittarius': 'null',
-        'capricorn': 'null',
-        'aquarius': 'null',
-        'pisces': 'null',
-        'todate': 'null'
+        'taurus': null,
+        'gemini': null,
+        'cancer': null,
+        'leo': null,
+        'virgo': null,
+        'libra': null,
+        'scorpio': null,
+        'sagittarius': null,
+        'capricorn': null,
+        'aquarius': null,
+        'pisces': null,
+        'todate': null
       }
     ];
 
@@ -52,18 +52,18 @@ void main() async {
         'author': 'Test author',
         'lang': 'en',
         'aries': 'aries',
-        'taurus': 'null',
-        'gemini': 'null',
-        'cancer': 'null',
-        'leo': 'null',
-        'virgo': 'null',
-        'libra': 'null',
-        'scorpio': 'null',
-        'sagittarius': 'null',
-        'capricorn': 'null',
-        'aquarius': 'null',
-        'pisces': 'null',
-        'todate': 'null'
+        'taurus': null,
+        'gemini': null,
+        'cancer': null,
+        'leo': null,
+        'virgo': null,
+        'libra': null,
+        'scorpio': null,
+        'sagittarius': null,
+        'capricorn': null,
+        'aquarius': null,
+        'pisces': null,
+        'todate': null
       }
     ];
     var result = await dbHelper.getFromRasifal();

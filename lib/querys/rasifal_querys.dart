@@ -17,7 +17,7 @@ class RasifalQuerys {
   Future<int?> updateForTableRasifal() async {
     Database? db = await databaseHelper.database;
     return await db?.rawUpdate(
-        'UPDATE $DB_TABLE_RASHIFAL SET type=Hello WHERE type=HelloDevp');
+        'UPDATE $DB_TABLE_RASHIFAL SET type="Hello" WHERE type="HelloDevp"');
   }
 
   Future<List<Map<String, dynamic>>?> getFromRasifal() async {
