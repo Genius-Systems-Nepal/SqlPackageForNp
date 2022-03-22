@@ -34,7 +34,7 @@ void main() async {
     await db.close();
   });
 
-  test("Update From Table AMessage", () async {
+  test("Update From Table PanchangaDb", () async {
     await dbHelper.updatePanchangaDbTable();
     dynamic getUpdatedvalue = [
       {
@@ -52,7 +52,7 @@ void main() async {
     await db.close();
   });
 
-  test("Deleted From Table AMessage", () async {
+  test("Deleted From Table PanchangaDb", () async {
     var result = await dbHelper.deleteFromTablePanchangaDb();
     expect(result, null);
   });

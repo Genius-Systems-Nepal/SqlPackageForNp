@@ -58,7 +58,7 @@ void main() async {
     await db.close();
   });
 
-  test("Update From Table AMessage", () async {
+  test("Update From Table Feeds", () async {
     await dbHelper.updateFeedsTable();
     dynamic getUpdatedvalue = [
       {
@@ -88,7 +88,7 @@ void main() async {
     await db.close();
   });
 
-  test("Deleted From Table AMessage", () async {
+  test("Deleted From Table Feeds", () async {
     var result = await dbHelper.deleteFromTableFeeds();
     expect(result, null);
   });
