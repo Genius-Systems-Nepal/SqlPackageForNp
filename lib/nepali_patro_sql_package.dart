@@ -26,6 +26,7 @@ import 'package:nepali_patro_sql_package/querys/timesofnepal/sources_querys.dart
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 class DatabaseHelper {
   final dbName = 'np.db';
@@ -42,8 +43,10 @@ class DatabaseHelper {
   }
 
   _initDatabase() async {
-    Directory documentsDirectory = await getApplicationDocumentsDirectory();
-    String dbPath = join(documentsDirectory.path, dbName);
+    // Directory documentsDirectory = await getApplicationDocumentsDirectory();
+    // String dbPath = join(documentsDirectory.path, dbName);
+    String dbPath = join(inMemoryDatabasePath, dbName);
+    await databaseFactoryFfi.openDatabase(dbPath);
     var theDB = await openDatabase(
       dbPath,
       version: dbVersion,
@@ -52,6 +55,10 @@ class DatabaseHelper {
       onUpgrade: onUpgrade,
     );
     return theDB;
+  }
+
+  close() async {
+    await _database?.close();
   }
 
   onCreatetable(Database db, int version) async {
@@ -88,23 +95,23 @@ class DatabaseHelper {
   //..........................Rasifal..............................//
 
   insertOnRasifalTable(parameter) async {
-    RasifalQuerys sql = RasifalQuerys();
+    RashifalQuerys sql = RashifalQuerys();
     return await sql.insertDataOnRasifalTable(parameter);
   }
 
   updateRasifal() async {
-    RasifalQuerys sql = RasifalQuerys();
-    await sql.updateForTableRasifal();
+    RashifalQuerys sql = RashifalQuerys();
+    await sql.updateForTableRashifal();
   }
 
   getFromRasifal() async {
-    RasifalQuerys sql = RasifalQuerys();
-    return await sql.getFromRasifal();
+    RashifalQuerys sql = RashifalQuerys();
+    return await sql.getFromRashifal();
   }
 
   deleteFromtableRasifal() async {
-    RasifalQuerys sql = RasifalQuerys();
-    return await sql.deleteFromTableRasifal();
+    RashifalQuerys sql = RashifalQuerys();
+    return await sql.deleteFromTableRashifal();
   }
 
   //.................................Blog..................................................//

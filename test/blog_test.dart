@@ -1,12 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nepali_patro_sql_package/nepali_patro_sql_package.dart';
-import 'package:sqflite/sqflite.dart';
-
 import 'nepali_patro_sql_package_test.dart';
 
 void main() async {
   sqfliteTestInit();
-  var db = await openDatabase(inMemoryDatabasePath);
   final dbHelper = DatabaseHelper.instance;
   test('Insert Data and Get Data From Blog ', () async {
     Map<String, dynamic> parameter = {
@@ -55,7 +52,7 @@ void main() async {
 
     var result = await dbHelper.getFromBlogTable();
     expect(result, getvalue);
-    await db.close();
+    await dbHelper.close();
   });
 
   test("Update From Table Blog", () async {
@@ -85,7 +82,7 @@ void main() async {
 
     var result = await dbHelper.getFromBlogTable();
     expect(result, getUpdatedvalue);
-    await db.close();
+    await dbHelper.close();
   });
 
   test("Deleted From Table Blog", () async {

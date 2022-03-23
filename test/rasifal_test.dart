@@ -6,7 +6,6 @@ import 'nepali_patro_sql_package_test.dart';
 
 void main() async {
   sqfliteTestInit();
-  var db = await openDatabase(inMemoryDatabasePath);
   final dbHelper = DatabaseHelper.instance;
   test('Insert Data and Get Data From Rasifal ', () async {
     Map<String, dynamic> parameter = {
@@ -41,7 +40,7 @@ void main() async {
 
     var result = await dbHelper.getFromRasifal();
     expect(result, getvalue);
-    await db.close();
+    await dbHelper.close();
   });
   test("Update From Table Rasifal", () async {
     await dbHelper.updateRasifal();
@@ -68,6 +67,7 @@ void main() async {
     ];
     var result = await dbHelper.getFromRasifal();
     expect(result, updatedvalue);
+    await dbHelper.close();
   });
 
   test("Deleted From Table Rasifal", () async {
