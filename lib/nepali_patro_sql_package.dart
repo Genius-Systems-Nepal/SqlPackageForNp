@@ -4,29 +4,33 @@ library nepali_patro_sql_package;
 
 import 'dart:io';
 import 'package:nepali_patro_sql_package/database/database_tables.dart';
+import 'package:nepali_patro_sql_package/models/amessage_model.dart';
+import 'package:nepali_patro_sql_package/models/blog_model.dart';
+import 'package:nepali_patro_sql_package/models/calendareventsmodel.dart';
+import 'package:nepali_patro_sql_package/models/rasifal_model.dart';
 import 'package:nepali_patro_sql_package/querys/blog_querys.dart';
 import 'package:nepali_patro_sql_package/querys/cachedb_querys.dart';
 import 'package:nepali_patro_sql_package/querys/calendar_querys.dart';
-import 'package:nepali_patro_sql_package/querys/deleted_event.dart';
-import 'package:nepali_patro_sql_package/querys/deleted_reminder_querys.dart';
-import 'package:nepali_patro_sql_package/querys/events_querys.dart';
+import 'package:nepali_patro_sql_package/querys/events/deleted_event.dart';
+import 'package:nepali_patro_sql_package/querys/events/events_querys.dart';
 import 'package:nepali_patro_sql_package/querys/exceptions_querys.dart';
-import 'package:nepali_patro_sql_package/querys/forex_details_querys.dart';
-import 'package:nepali_patro_sql_package/querys/forex_querys.dart';
+import 'package:nepali_patro_sql_package/querys/forex/forex_details_querys.dart';
+import 'package:nepali_patro_sql_package/querys/forex/forex_querys.dart';
 import 'package:nepali_patro_sql_package/querys/holidays_querys.dart';
 import 'package:nepali_patro_sql_package/querys/message_querys.dart';
 import 'package:nepali_patro_sql_package/querys/panchangadb_querys.dart';
 import 'package:nepali_patro_sql_package/querys/rasifal_querys.dart';
-import 'package:nepali_patro_sql_package/querys/reminders_querys.dart';
+import 'package:nepali_patro_sql_package/querys/reminders/deleted_reminder_querys.dart';
+import 'package:nepali_patro_sql_package/querys/reminders/reminders_querys.dart';
 import 'package:nepali_patro_sql_package/querys/timesofnepal/bookmark_querys.dart';
 import 'package:nepali_patro_sql_package/querys/timesofnepal/categories_querys.dart';
 import 'package:nepali_patro_sql_package/querys/timesofnepal/feeds_querys.dart';
 import 'package:nepali_patro_sql_package/querys/timesofnepal/related_feeds_querys.dart';
 import 'package:nepali_patro_sql_package/querys/timesofnepal/sources_querys.dart';
 import 'package:path/path.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+// import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 class DatabaseHelper {
   final dbName = 'np.db';
@@ -43,16 +47,17 @@ class DatabaseHelper {
   }
 
   _initDatabase() async {
+    String dbPath = join(Platform.script.toFilePath(), dbName);
     // Directory documentsDirectory = await getApplicationDocumentsDirectory();
     // String dbPath = join(documentsDirectory.path, dbName);
-    String dbPath = join(inMemoryDatabasePath, dbName);
-    await databaseFactoryFfi.openDatabase(dbPath);
-    var theDB = await openDatabase(
+    var theDB = await databaseFactoryFfi.openDatabase(
       dbPath,
-      version: dbVersion,
-      onOpen: (db) {},
-      onCreate: onCreatetable,
-      onUpgrade: onUpgrade,
+      options: OpenDatabaseOptions(
+        onOpen: (db) {},
+        onCreate: onCreatetable,
+        // onUpgrade: onUpgrade,
+        version: dbVersion,
+      ),
     );
     return theDB;
   }
@@ -88,47 +93,47 @@ class DatabaseHelper {
 
   Future<void> onUpgrade(Database db, int oldv, int newv) async {}
 
+//  .........................simple Test example ...............
   String reverseString(String initial) {
     return initial.split('').reversed.join();
   }
-
   //..........................Rasifal..............................//
+
+  insertRasifal(List<Np> model) async {
+    RashifalQuerys sql = RashifalQuerys();
+    return await sql.insertRashifal(model);
+  }
 
   insertOnRasifalTable(parameter) async {
     RashifalQuerys sql = RashifalQuerys();
     return await sql.insertDataOnRasifalTable(parameter);
   }
 
-  updateRasifal() async {
+  Future<Np?> getFromRasifal(String tag) async {
     RashifalQuerys sql = RashifalQuerys();
-    await sql.updateForTableRashifal();
+    return await sql.getRashifalByTag(tag);
   }
 
-  getFromRasifal() async {
+  deleteFromtableRasifal(String tag) async {
     RashifalQuerys sql = RashifalQuerys();
-    return await sql.getFromRashifal();
-  }
-
-  deleteFromtableRasifal() async {
-    RashifalQuerys sql = RashifalQuerys();
-    return await sql.deleteFromTableRashifal();
+    return await sql.deleteFromTableRashifal(tag);
   }
 
   //.................................Blog..................................................//
 
-  insertOnBlogTable(parameter) async {
+  insertOnBlogTable(model) async {
     BlogQuerys sql = BlogQuerys();
-    await sql.insertDataOnBlogTable(parameter);
+    return await sql.insertBlog(model);
   }
 
-  updateBlogTable() async {
+  updateBlogTable(BlogModel blogs, int id) async {
     BlogQuerys sql = BlogQuerys();
-    await sql.updateForTableBlog();
+    await sql.updateBlog(blogs, id);
   }
 
-  getFromBlogTable() async {
+  getFromBlogTable(id) async {
     BlogQuerys sql = BlogQuerys();
-    return await sql.getFromBlog();
+    return await sql.getBlogById(id);
   }
 
   deleteFromTableBlog() async {
@@ -136,15 +141,45 @@ class DatabaseHelper {
     return await sql.deleteFromTableBlog();
   }
 
-  //...................................Message ......................................//
-  insertOnMessageTable(parameter) async {
-    MessageQuerys sql = MessageQuerys();
-    await sql.insertDataOnMessageTable(parameter);
+  getBlogDateTime(bool latest) async {
+    BlogQuerys sql = BlogQuerys();
+    return await sql.getBlogDateTime(latest);
   }
 
-  updateMessageTable() async {
+  loadBlogs(id) async {
+    BlogQuerys sql = BlogQuerys();
+    return await sql.loadBlogs(id);
+  }
+
+  loadDailyBlog(id) async {
+    BlogQuerys sql = BlogQuerys();
+    return await sql.loadDailyBlog(id);
+  }
+
+  loadAllBlogs() async {
+    BlogQuerys sql = BlogQuerys();
+    return await sql.loadAllBlogs();
+  }
+
+  setBlogAsRead(blogItem) async {
+    BlogQuerys sql = BlogQuerys();
+    return await sql.setBlogAsRead(blogItem);
+  }
+
+  getSearchBlog(String text) async {
+    BlogQuerys sql = BlogQuerys();
+    return await sql.getSearchBlog(text);
+  }
+
+  //...................................Message ......................................//
+  insertOrUpdateAMessages(List<Content> content) async {
     MessageQuerys sql = MessageQuerys();
-    await sql.updateForTableMessage();
+    await sql.insertAmessages(content);
+  }
+
+  updateMessageTable(Content updatedmessage) async {
+    MessageQuerys sql = MessageQuerys();
+    await sql.updateAmessage(updatedmessage);
   }
 
   deleteFromTableMessage() async {
@@ -152,9 +187,19 @@ class DatabaseHelper {
     await sql.deleteFromTableMessage();
   }
 
-  getFromMessage() async {
+  Future<Content?> getFromMessage(String id) async {
     MessageQuerys sql = MessageQuerys();
-    return await sql.getFromMessage();
+    return await sql.getAmessageById(id);
+  }
+
+  Future<List<Content?>> getAmessages() async {
+    MessageQuerys sql = MessageQuerys();
+    return await sql.getAmessages();
+  }
+
+  getAmessageById(id) async {
+    MessageQuerys sql = MessageQuerys();
+    return await sql.getAmessageById(id);
   }
 
   //............................Calendar.......................................//
@@ -181,14 +226,14 @@ class DatabaseHelper {
 
   //................................Events..................................................//
 
-  insertOnEventsTable(parameter) async {
+  insertEvents(List<dynamic> events, forceUpdate, needEncryption) async {
     EventsQuerys sql = EventsQuerys();
-    await sql.insertDataOnEventsTable(parameter);
+    await sql.insertEvents(events, forceUpdate, needEncryption: needEncryption);
   }
 
-  updateEventsTable() async {
+  getCalendarEventbyId(String id) async {
     EventsQuerys sql = EventsQuerys();
-    await sql.updateForTableEvents();
+    return await sql.getCalendarEventbyId(id);
   }
 
   deleteFromTableEvents() async {
@@ -196,11 +241,87 @@ class DatabaseHelper {
     await sql.deleteFromTableEvents();
   }
 
-  getFromEvents() async {
+  getEvents() async {
     EventsQuerys sql = EventsQuerys();
-    return await sql.getFromEvents();
+    return await sql.getEvents();
   }
 
+  getEventByIdWithDate(id, date) async {
+    EventsQuerys sql = EventsQuerys();
+    return sql.getEventByIdWithDate(id, date);
+  }
+
+  getEventToday(DateTime time) async {
+    EventsQuerys sql = EventsQuerys();
+    return sql.getEventToday(time);
+  }
+
+  disableUserEvent(Event event) async {
+    EventsQuerys sql = EventsQuerys();
+    return sql.disableUserEvent(event);
+  }
+
+  deleteuserEventById(id) async {
+    EventsQuerys sql = EventsQuerys();
+    return sql.deleteuserEventById(id);
+  }
+
+  updateUserEventsAuthority(prevId, newId) async {
+    EventsQuerys sql = EventsQuerys();
+    return sql.updateUserEventsAuthority(prevId, newId);
+  }
+
+  getUserevents(userId, {status, calendarId}) async {
+    EventsQuerys sql = EventsQuerys();
+    return sql.getUserevents(userId, status: status, calendarId: calendarId);
+  }
+
+  getCalendarEventsByIds(String ids) async {
+    EventsQuerys sql = EventsQuerys();
+    return sql.getCalendarEventsByIds(ids);
+  }
+
+  getExpiredNonRepeatingEvents({calendarId, status}) async {
+    EventsQuerys sql = EventsQuerys();
+    return sql.getExpiredNonRepeatingEvents(
+        calendarId: calendarId, status: status);
+  }
+
+  getActiveNonRepeatingEvents({calendarId, status}) async {
+    EventsQuerys sql = EventsQuerys();
+    return sql.getActiveNonRepeatingEvents(
+        calendarId: calendarId, status: status);
+  }
+
+  getExpiredEvents({calendarId, status}) async {
+    EventsQuerys sql = EventsQuerys();
+    return sql.getExpiredEvents(calendarId: calendarId, status: status);
+  }
+
+  getActiveEvents({calendarId, status}) async {
+    EventsQuerys sql = EventsQuerys();
+    return sql.getActiveEvents(calendarId: calendarId, status: status);
+  }
+
+  getSearchEvents(keyword) async {
+    EventsQuerys sql = EventsQuerys();
+    return sql.getSearchEvents(keyword);
+  }
+
+  getAllUserEvents() async {
+    EventsQuerys sql = EventsQuerys();
+    return sql.getAllUserEvents();
+  }
+
+  getSyncPendingEvents() async {
+    EventsQuerys sql = EventsQuerys();
+    return sql.getSyncPendingEvents();
+  }
+
+  getEventsbetweenDates(startDate, endDate) async {
+    EventsQuerys sql = EventsQuerys();
+    return sql.getEventsbetweenDates(startDate, endDate);
+  }
   //.....................................Holidays,.....................................//
 
   insertOnHolidaysTable(parameter) async {
@@ -313,14 +434,11 @@ class DatabaseHelper {
 
   //............................................PanchangaDb..........................................//
 
-  insertOnPanchangaDbTable(parameter) async {
+  insertPanchangaData(
+      String np, String en, String ddNp, String ddEn, String date,
+      {id}) async {
     PanchangaDbQuerys sql = PanchangaDbQuerys();
-    await sql.insertDataOnPanchangaDbTable(parameter);
-  }
-
-  updatePanchangaDbTable() async {
-    PanchangaDbQuerys sql = PanchangaDbQuerys();
-    await sql.updateForTablePanchangaDb();
+    await sql.insertPanchangaData(np, en, ddNp, ddEn, date);
   }
 
   deleteFromTablePanchangaDb() async {
@@ -328,9 +446,9 @@ class DatabaseHelper {
     await sql.deleteFromTablePanchangaDb();
   }
 
-  getFromPanchangaDb() async {
+  getPanchangaByDate(String date) async {
     PanchangaDbQuerys sql = PanchangaDbQuerys();
-    return await sql.getFromPanchangaDb();
+    return await sql.getPanchangaByDate('date');
   }
 
   //............................................CacheDb..........................................//

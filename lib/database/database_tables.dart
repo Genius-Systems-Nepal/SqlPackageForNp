@@ -107,7 +107,7 @@ class DatabaseTable {
         ${EventsTable.description} TEXT,
         ${EventsTable.start_date} TEXT,
         ${EventsTable.end_date} TEXT,
-        ${EventsTable.is_full_day_event} TEXT,
+        ${EventsTable.is_full_day_event} INTEGER,
         ${EventsTable.recurring_end_date} TEXT,
         ${EventsTable.is_recurring} INTEGER,
         ${EventsTable.created_by} TEXT,

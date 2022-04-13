@@ -1,0 +1,20 @@
+
+{  "Content":[
+      {
+        "id": "1",
+        "messageNp": "hi np",
+        "messageEn": "hi en",
+        "linktype": "typeone",
+        "link":"www.google.com.np",
+        "stdate":"2021, 06,2",
+        "expiry":"30-06-2121",
+        "aflag":"hi flag",
+        "pin":"2222",
+        "enable":"yes",
+        "options": "{\"title\": {\"en\": \"New Year Offer\",\"np\": \"नयाँ वर्षको कोसेली, घर भित्र्याऔं यसपाली\"},\"subtitle\": {\"en\": \"AD\",\"np\": \" विज्ञापन\"},\"thumbnail\": \"\",\"image\": \"https://api.nepalipatro.com.np/storage/banners/UYXHNbzwVPHDjoFg.jpg\"}"
+      }
+    ]
+  }
+    
+    
+  

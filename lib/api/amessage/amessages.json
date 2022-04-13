@@ -1,0 +1,27 @@
+{
+    "copyright": "This content is intellectual property of Nepali Patro. Unauthorized use of information herein is strictly prohibited",
+    "refresh": "5",
+    "clear": "2",
+    "refetch": "432000",
+    "content": [
+        {
+            "id": 1597,
+            "message_np": "यस नयाँ वर्ष २०७९ मा सामसङका उत्कृष्ट टि.भि., रेफ्रिजेरेटर र वासिङ मेसिनमा आकर्षक छुट",
+            "message_en": "Get attractive discounts on refrigerators, televisions and washing machines on the occasion of New Year 2079.",
+            "linktype": "url",
+            "link": "https://bit.ly/37YG51a",
+            "stdate": "2022-03-24 00:00:00",
+            "expiry": 5270400,
+            "aflag": 1,
+            "pin": "0",
+            "enable": "Y",
+            "options": "{\"title\": {\"en\": \"New Year Offer\",\"np\": \"नयाँ वर्षको कोसेली, घर भित्र्याऔं यसपाली\"},\"subtitle\": {\"en\": \"AD\",\"np\": \" विज्ञापन\"},\"thumbnail\": \"\",\"image\": \"https://api.nepalipatro.com.np/storage/banners/UYXHNbzwVPHDjoFg.jpg\"}",
+            "version": "",
+            "version_operator": null,
+            "appvcode": "",
+            "appvname": "",
+            "dorder": 3,
+            "countries": null
+        }
+    ]
+}

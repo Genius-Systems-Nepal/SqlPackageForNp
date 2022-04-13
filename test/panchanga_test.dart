@@ -1,53 +1,50 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nepali_patro_sql_package/nepali_patro_sql_package.dart';
-import 'package:sqflite/sqflite.dart';
-
 import 'nepali_patro_sql_package_test.dart';
 
 void main() async {
   sqfliteTestInit();
   final dbHelper = DatabaseHelper.instance;
   test('Insert Data and Get Data From Panchanga ', () async {
-    Map<String, dynamic> parameter = {
-      'id': 1,
-      'date': '2022/2/2',
-      'text_np': 'text_np',
-      'text_en': 'text_en',
-      'text_ddnp': 'www.conte',
-      'text_dden': 'www',
-    };
-    await dbHelper.insertOnPanchangaDbTable(parameter);
-    dynamic getvalue = [
+    String np = 'np';
+    String en = 'en';
+    String ddNp = 'ddnp';
+    String ddEn = 'dden';
+    String date = 'date';
+
+    await dbHelper.insertPanchangaData(np, en, ddNp, ddEn, date);
+    dynamic expectedOutput = [
       {
         'id': 1,
-        'date': '2022/2/2',
-        'text_np': 'text_np',
-        'text_en': 'text_en',
-        'text_ddnp': 'www.conte',
-        'text_dden': 'www',
+        'date': 'date',
+        'text_np': 'np',
+        'text_en': 'en',
+        'text_ddnp': 'ddnp',
+        'text_dden': 'dden'
       }
     ];
 
-    var result = await dbHelper.getFromPanchangaDb();
-    expect(result, getvalue);
+    var actualOutput = await dbHelper.getPanchangaByDate(
+      'date',
+    );
+    // expectedOutput["id"] = actualOutput["id"];
+    expect(actualOutput, expectedOutput);
     await dbHelper.close();
   });
 
-  test("Update From Table PanchangaDb", () async {
-    await dbHelper.updatePanchangaDbTable();
-    dynamic getUpdatedvalue = [
+  test("Get Panchanga By Date", () async {
+    var actualOutput = await dbHelper.getPanchangaByDate('date');
+    dynamic expectedOutput = [
       {
         'id': 1,
-        'date': '2022/2/2',
-        'text_np': 'text_np',
-        'text_en': 'text_en',
-        'text_ddnp': 'www.conte',
-        'text_dden': 'www.org',
+        'date': 'date',
+        'text_np': 'np',
+        'text_en': 'en',
+        'text_ddnp': 'ddnp',
+        'text_dden': 'dden'
       }
     ];
-
-    var result = await dbHelper.getFromPanchangaDb();
-    expect(result, getUpdatedvalue);
+    expect(actualOutput, expectedOutput);
     await dbHelper.close();
   });
 
