@@ -2,6 +2,8 @@
 //
 // final calendarEvents = calendarEventsFromJson(jsonString);
 
+// ignore_for_file: prefer_null_aware_operators, non_constant_identifier_names, must_be_immutable
+
 import 'dart:convert';
 
 import 'package:equatable/equatable.dart';
@@ -74,7 +76,6 @@ class Event extends Equatable {
   FormattedRrule? formattedRrule;
   DateTime? rsstart;
   int? origid;
-
   Event({
     this.id,
     this.parentEventId,
@@ -110,67 +111,68 @@ class Event extends Equatable {
     this.origid,
   });
 
-  factory Event.fromJson(Map<String, dynamic> json) {
+  factory Event.fromJson(Map<String, dynamic> data) {
     // try {
     var event = Event(
-      id: json["id"] == null ? null : json["id"].toString(),
-      parentEventId: json["parent_event_id"] == null
+      id: data["id"] == null ? null : data["id"].toString(),
+      parentEventId: data["parent_event_id"] == null
           ? ""
-          : json["parent_event_id"].toString(),
-      title: json["title"],
-      description: json["description"],
-      startDate: json["start_date"] == null
+          : data["parent_event_id"].toString(),
+      title: data["title"],
+      description: data["description"],
+      startDate: data["start_date"] == null
           ? null
-          : DateTime.parse(json["start_date"]),
+          : DateTime.parse(data["start_date"]),
       endDate:
-          json["end_date"] == null ? null : DateTime.parse(json["end_date"]),
-      isFullDayEvent: json["is_full_day_event"],
-      recurringEndDate: json["recurring_end_date"] == null
+          data["end_date"] == null ? null : DateTime.parse(data["end_date"]),
+      isFullDayEvent: data["is_full_day_event"],
+      recurringEndDate: data["recurring_end_date"] == null
           ? null
-          : DateTime.parse(json["recurring_end_date"]),
-      isRecurring: json["is_recurring"],
-      createdBy: json["created_by"],
-      hasReminder: json["has_reminder"],
-      location: json["location"],
-      /*guests: json["guests"] == null
+          : DateTime.parse(data["recurring_end_date"]),
+      isRecurring: data["is_recurring"],
+      createdBy: data["created_by"],
+      hasReminder: data["has_reminder"],
+      location: data["location"],
+      /*guests: data["guests"] == null
             ? null
-            :   List<dynamic>.from(json["guests"].map((x) => x)),*/ // remove because it makes error,
-      rsvp: json["rsvp"],
-      note: json["note"],
-      eventPermission: json["event_permission"] == null
+            :   List<dynamic>.from(data["guests"].map((x) => x)),*/ // remove because it makes error,
+      rsvp: data["rsvp"],
+      note: data["note"],
+      eventPermission: data["event_permission"] == null
           ? null
-          : List<String>.from(json["event_permission"].map((x) => x)),
-      visibility: json["visibility"],
-      privacy: json["privacy"],
-      status: json["status"],
-      duration: json["duration"],
-      gh: json["gh"] ?? 0,
-      imp: json["important_event"] ?? 0,
-      rrule: json["rrule"] == null ? null : Utils.decryptData(json["rrule"]),
-      deletedAt: json["deleted_at"],
-      createdAt: json["created_at"] == null
+          : List<String>.from(
+              (json.decode(data["event_permission"]).map((x) => x))),
+      visibility: data["visibility"],
+      privacy: data["privacy"],
+      status: data["status"],
+      duration: data["duration"],
+      gh: data["gh"] ?? 0,
+      imp: data["important_event"] ?? 0,
+      rrule: data["rrule"] == null ? null : Utils.decryptData(data["rrule"]),
+      deletedAt: data["deleted_at"],
+      createdAt: data["created_at"] == null
           ? null
-          : DateTime.parse(json["created_at"]),
-      updatedAt: json["updated_at"] == null
+          : DateTime.parse(data["created_at"]),
+      updatedAt: data["updated_at"] == null
           ? null
-          : DateTime.parse(json["updated_at"]),
+          : DateTime.parse(data["updated_at"]),
       calendar_id:
-          json["calendar_id"] == null ? null : json["calendar_id"].toString(),
-      basedOn: json["based_on"],
-      rsvpStats: json["rsvp_stats"] == null
+          data["calendar_id"] == null ? null : data["calendar_id"].toString(),
+      basedOn: data["based_on"],
+      rsvpStats: data["rsvp_stats"] == null
           ? null
-          : RsvpStats.fromJson(json["rsvp_stats"]),
-      formattedRrule: json["formatted_rrule"] == null
+          : RsvpStats.fromJson(data["rsvp_stats"]),
+      formattedRrule: data["formatted_rrule"] == null
           ? null
-          : json["formatted_rrule"] is! Map
+          : data["formatted_rrule"] is! Map
               ? null
-              : FormattedRrule.fromJson(json["formatted_rrule"]),
-      rsstart: json["rsstart"] == null ? null : DateTime.parse(json["rsstart"]),
-      origid: json["origid"] == null
+              : FormattedRrule.fromJson(data["formatted_rrule"]),
+      rsstart: data["rsstart"] == null ? null : DateTime.parse(data["rsstart"]),
+      origid: data["origid"] == null
           ? -1
-          : (json["origid"] is String)
-              ? int.tryParse(json["origid"]) ?? -1
-              : json["origid"],
+          : (data["origid"] is String)
+              ? int.tryParse(data["origid"]) ?? -1
+              : data["origid"],
     );
     return event;
     // } catch (e) {
@@ -399,7 +401,7 @@ class Event extends Equatable {
     // }
   }
 
-  Map<String, dynamic> toJson({formatDate: false}) => {
+  Map<String, dynamic> toJson({formatDate = false}) => {
         "id": id == null ? null : id.toString(),
         "parent_event_id":
             parentEventId == null ? null : parentEventId.toString(),
@@ -463,7 +465,7 @@ class Event extends Equatable {
         "origid": origid ?? -1,
       };
 
-  Map<String, dynamic> toJsonDecrypt({formatDate: false}) => {
+  Map<String, dynamic> toJsonDecrypt({formatDate = false}) => {
         "id": id == null ? null : id.toString(),
         "parent_event_id":
             parentEventId == null ? null : parentEventId.toString(),
@@ -527,7 +529,7 @@ class Event extends Equatable {
         "origid": origid ?? -1,
       };
 
-  Map<String, dynamic> toJsonNoEncryption({formatDate: false}) => {
+  Map<String, dynamic> toJsonNoEncryption({formatDate = false}) => {
         "id": id == null ? null : id.toString(),
         "parent_event_id":
             parentEventId == null ? null : parentEventId.toString(),
@@ -592,7 +594,6 @@ class Event extends Equatable {
       };
 
   @override
-  // TODO: implement props
   List<Object?> get props => [
         id,
         parentEventId,

@@ -1,62 +1,87 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:nepali_patro_sql_package/database/db_constraints.dart';
+import 'package:nepali_patro_sql_package/models/holidaysmodel.dart';
 import 'package:nepali_patro_sql_package/nepali_patro_sql_package.dart';
 import 'nepali_patro_sql_package_test.dart';
 
 void main() async {
   sqfliteTestInit();
   final dbHelper = DatabaseHelper.instance;
-  test('Insert Data and Get Data From Holidays ', () async {
-    Map<String, dynamic> parameter = {
-      'id': 1,
-      'eventId': 'testid',
-      'eventDate': 'hidate',
-      'holidayType': 'vacation',
-      'status': 0,
-      'createdAt': 'en',
-      'updatedAt': 'hi',
-      'deletedAt': 'hi'
-    };
-    await dbHelper.insertOnHolidaysTable(parameter);
-    dynamic getvalue = [
+  test("insertHolidays", () async {
+    List<HolidaysModel>? model = [
+      HolidaysModel(
+        id: 1,
+        eventId: '1',
+        eventDate: DateTime.parse("2019-09-20"),
+        holidayType: "gov",
+        status: 1,
+        createdAt: DateTime.parse("2019-09-20"),
+        updatedAt: DateTime.parse("2020-09-20"),
+        deletedAt: null,
+      )
+    ];
+    HolidaysList parameter = HolidaysList(holidaysList: model);
+    await dbHelper.insertHolidays(parameter);
+    var actualOutput = await dbHelper.getFromHolidays();
+    dynamic expectedOutput = [
       {
-        'id': 1,
-        'eventId': 'testid',
-        'eventDate': 'hidate',
-        'holidayType': 'vacation',
-        'status': 0,
-        'createdAt': 'en',
-        'updatedAt': 'hi',
-        'deletedAt': 'hi'
+        HolidaysDb.id: 1,
+        HolidaysDb.eventId: '1',
+        HolidaysDb.eventDate: '2019-09-20T00:00:00.000',
+        HolidaysDb.holidayType: 'gov',
+        HolidaysDb.status: 1,
+        HolidaysDb.createdAt: '2019-09-20T00:00:00.000',
+        HolidaysDb.updatedAt: '2020-09-20T00:00:00.000',
+        HolidaysDb.deletedAt: ''
       }
     ];
-
-    var result = await dbHelper.getFromHolidays();
-    expect(result, getvalue);
+    expect(actualOutput, expectedOutput);
     await dbHelper.close();
   });
 
-  test("Update From Table Holidays", () async {
-    await dbHelper.updateHolidaysTable();
-    dynamic getUpdatedvalue = [
-      {
-        'id': 1,
-        'eventId': 'testid',
-        'eventDate': 'hidate',
-        'holidayType': 'vacation',
-        'status': 1,
-        'createdAt': 'en',
-        'updatedAt': 'hi',
-        'deletedAt': 'hi'
-      }
+  test("getAllHolidays", () async {
+    var actualOutput = await dbHelper.getAllHolidays(
+        DateTime.parse("2011-10-30"), DateTime.parse("2029-10-30"));
+    dynamic expectedOutput = [
+      HolidaysModel(
+          id: 1,
+          eventId: "1",
+          eventDate: DateTime.parse("2019-09-20"),
+          holidayType: "gov",
+          status: 1,
+          createdAt: DateTime.parse("2019-09-20"),
+          updatedAt: DateTime.parse("2020-09-20"),
+          deletedAt: '')
     ];
+    expect(actualOutput, expectedOutput);
+    await dbHelper.close();
+  });
 
-    var result = await dbHelper.getFromHolidays();
-    expect(result, getUpdatedvalue);
+  test("getGovernmentHolidaysFromWeb", () async {
+    var actualOutput = await dbHelper.getGovernmentHolidaysFromWeb(
+        DateTime.parse("2011-10-30"), DateTime.parse("2029-10-30"));
+    dynamic expectedOutput;
+    expect(actualOutput, expectedOutput);
+    await dbHelper.close();
+  });
+  test("getGovernmentHolidays", () async {
+    var actualOutput = await dbHelper.getGovernmentHolidays(
+        DateTime.parse("2011-10-30"), DateTime.parse("2029-10-30"));
+    dynamic expectedOutput;
+    expect(actualOutput, expectedOutput);
+    await dbHelper.close();
+  });
+  test("deleteHolidays", () async {
+    var actualOutput = await dbHelper.deleteHolidays();
+    var expectedOutput = true;
+    expect(actualOutput, expectedOutput);
     await dbHelper.close();
   });
 
   test("Deleted From Table Holidays", () async {
-    var result = await dbHelper.deleteFromTableHolidays();
-    expect(result, null);
+    var actualOutput = await dbHelper.deleteFromTableHolidays();
+    dynamic expectedOutput;
+    expect(actualOutput, expectedOutput);
+    await dbHelper.close();
   });
 }

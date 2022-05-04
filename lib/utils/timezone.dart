@@ -3,6 +3,8 @@
 //
 //    See instant.dart for full license notice...
 
+// ignore_for_file: equal_keys_in_map
+
 import 'package:timezone/timezone.dart';
 
 class Timezone {

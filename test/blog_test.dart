@@ -1,4 +1,7 @@
+// ignore_for_file: prefer_const_literals_to_create_immutables
+
 import 'package:flutter_test/flutter_test.dart';
+import 'package:nepali_patro_sql_package/database/db_constraints.dart';
 import 'package:nepali_patro_sql_package/models/blog_model.dart';
 import 'package:nepali_patro_sql_package/nepali_patro_sql_package.dart';
 import 'nepali_patro_sql_package_test.dart';
@@ -6,7 +9,7 @@ import 'nepali_patro_sql_package_test.dart';
 void main() async {
   sqfliteTestInit();
   final dbHelper = DatabaseHelper.instance;
-  test('Insert Data on table Blog ', () async {
+  test('insertBlog ', () async {
     BlogModel model = BlogModel(posts: [
       Post(
           id: 1,
@@ -32,74 +35,74 @@ void main() async {
           ),
           event: 2)
     ]);
-    await dbHelper.insertOnBlogTable(model);
-    dynamic expectedOuput = [
+    await dbHelper.insertBlog(model);
+    List<dynamic> expectedOuput = [
       {
-        'id': 1,
-        'date': '2022-01-01',
-        'modified': '2022-01-01',
-        'url': 'www.google.com',
-        'title': 'hi',
-        'content': 'hello content',
-        'excerpt': 'hi excerpt',
-        'thumbnail': 'hi thumbnail',
-        'categories': '',
-        'tags':
+        Blogs.id: 1,
+        Blogs.date: '2022-01-01',
+        Blogs.modified: '2022-01-01',
+        Blogs.url: 'www.google.com',
+        Blogs.title: 'hi',
+        Blogs.content: 'hello content',
+        Blogs.excerpt: 'hi excerpt',
+        Blogs.thumbnail: 'hi thumbnail',
+        Blogs.categories: '',
+        Blogs.tags:
             '[{"id":1,"slug":null,"title":"hi","description":null,"parent":null,"post_count":null}]',
-        'author':
+        Blogs.author:
             '{"id":null,"slug":null,"name":null,"first_name":null,"last_name":null,"nickname":null,"url":"www.google.com","description":null}',
-        'comments': '',
-        'comment_count': 10,
-        'thumbnail_images':
+        Blogs.comments: '',
+        Blogs.comment_count: 10,
+        Blogs.thumbnail_images:
             '{"full":{"url":"https://cdn.pixabay.com/photo/2015/04/23/22/00/tree-736885__480.jpg","width":12,"height":23},"thumbnail":null,"medium":null,"medium_large":null,"large":null,"post-thumbnail":null}',
-        'readdate': '',
-        'isread': 0,
-        'ignore': 0,
-        'event': 0
+        Blogs.readdate: '',
+        Blogs.isread: 0,
+        Blogs.ignore: 0,
+        Blogs.event: 0
       }
     ];
-    var actualOutput = await dbHelper.getFromBlogTable(1);
+    List? actualOutput = await dbHelper.getBlogById(1);
     expect(actualOutput, expectedOuput);
     await dbHelper.close();
   });
-  test('get all from table blog', () async {
-    dynamic expectedOuput = [
+  test('getFromBlogTable', () async {
+    List<Map<dynamic, dynamic>> expectedOuput = [
       {
-        'id': 1,
-        'date': '2022-01-01',
-        'modified': '2022-01-01',
-        'url': 'www.google.com',
-        'title': 'hi',
-        'content': 'hello content',
-        'excerpt': 'hi excerpt',
-        'thumbnail': 'hi thumbnail',
-        'categories': '',
-        'tags':
+        Blogs.id: 1,
+        Blogs.date: '2022-01-01',
+        Blogs.modified: '2022-01-01',
+        Blogs.url: 'www.google.com',
+        Blogs.title: 'hi',
+        Blogs.content: 'hello content',
+        Blogs.excerpt: 'hi excerpt',
+        Blogs.thumbnail: 'hi thumbnail',
+        Blogs.categories: '',
+        Blogs.tags:
             '[{"id":1,"slug":null,"title":"hi","description":null,"parent":null,"post_count":null}]',
-        'author':
+        Blogs.author:
             '{"id":null,"slug":null,"name":null,"first_name":null,"last_name":null,"nickname":null,"url":"www.google.com","description":null}',
-        'comments': '',
-        'comment_count': 10,
-        'thumbnail_images':
+        Blogs.comments: '',
+        Blogs.comment_count: 10,
+        Blogs.thumbnail_images:
             '{"full":{"url":"https://cdn.pixabay.com/photo/2015/04/23/22/00/tree-736885__480.jpg","width":12,"height":23},"thumbnail":null,"medium":null,"medium_large":null,"large":null,"post-thumbnail":null}',
-        'readdate': '',
-        'isread': 0,
-        'ignore': 0,
-        'event': 0
+        Blogs.readdate: '',
+        Blogs.isread: 0,
+        Blogs.ignore: 0,
+        Blogs.event: 0
       }
     ];
-    var actualOutput = await dbHelper.getFromBlogTable(1);
+    List? actualOutput = await dbHelper.getBlogById(1);
     expect(actualOutput, expectedOuput);
   });
-  test("Get BlogDateTime From Blog", () async {
+  test("getBlogDateTime", () async {
     var expectedOutput = "20220101";
     String actualOutput = await dbHelper.getBlogDateTime(true);
     expect(actualOutput, expectedOutput);
     await dbHelper.close();
   });
 
-  test("Load Blogs", () async {
-    var expectedOutput = [
+  test("loadBlogs", () async {
+    List<Post> expectedOutput = [
       Post(
         id: 1,
         type: null,
@@ -152,14 +155,14 @@ void main() async {
         event: 0,
       )
     ];
-    var actualOutput = await dbHelper.loadBlogs(1);
+    List<Post> actualOutput = await dbHelper.loadBlogs(1);
     expect(actualOutput, expectedOutput);
     await dbHelper.close();
   });
 
-  test("Load Daily Blog", () async {
-    var actualOutput = await dbHelper.loadDailyBlog('1');
-    var expectedOutput = [
+  test("loadDailyBlog", () async {
+    List<Post> actualOutput = await dbHelper.loadDailyBlog('1');
+    List<Post> expectedOutput = [
       Post(
         id: 1,
         type: null,
@@ -216,9 +219,9 @@ void main() async {
     await dbHelper.close();
   });
 
-  test("Get Search Blog", () async {
-    var actualOutput = await dbHelper.getSearchBlog('hi');
-    var expectedOutput = [
+  test("getSearchBlog", () async {
+    List<Post> actualOutput = await dbHelper.getSearchBlog('hi');
+    List<Post> expectedOutput = [
       Post(
         id: 1,
         type: null,
@@ -274,8 +277,8 @@ void main() async {
     expect(actualOutput, expectedOutput);
     await dbHelper.close();
   });
-  test("Load All Blogs", () async {
-    var expectedOutput = [
+  test("loadAllBlogs", () async {
+    List<List<Post>> expectedOutput = [
       [
         Post(
           id: 1,
@@ -330,12 +333,70 @@ void main() async {
         )
       ]
     ];
-    var actualOutput = await dbHelper.loadAllBlogs();
+    List<List<Post>> actualOutput = await dbHelper.loadAllBlogs();
     expect(actualOutput, expectedOutput);
     await dbHelper.close();
   });
-  test('Set Blog As Read', () async {
-    var blogItem = Post(
+  test("loadBlogsByDate", () async {
+    List<Post> actualOutput = await dbHelper.loadBlogsByDate('2022-01-01');
+    List<Post> expectedOutput = [
+      Post(
+        id: 1,
+        type: null,
+        slug: null,
+        url: 'www.google.com',
+        status: null,
+        title: 'hi',
+        titlePlain: null,
+        content: "hello content",
+        excerpt: 'hi excerpt',
+        date: '2022-01-01',
+        modified: '2022-01-01',
+        categories: null,
+        tags: [
+          Category(
+              id: 1,
+              slug: null,
+              title: 'hi',
+              description: null,
+              parent: null,
+              postCount: null)
+        ],
+        author: Author(
+            id: null,
+            firstName: null,
+            lastName: null,
+            name: null,
+            nickname: null,
+            slug: null,
+            description: null,
+            url: "www.google.com"),
+        comments: null,
+        attachments: null,
+        commentCount: 10,
+        commentStatus: null,
+        thumbnail: 'hi thumbnail',
+        customFields: null,
+        thumbnailSize: null,
+        thumbnailImages: Images(
+            full: Full(
+                url:
+                    'https://cdn.pixabay.com/photo/2015/04/23/22/00/tree-736885__480.jpg',
+                width: 12,
+                height: 23),
+            thumbnail: Full(height: null, url: null, width: null),
+            medium: Full(height: null, url: null, width: null),
+            mediumLarge: Full(height: null, url: null, width: null),
+            large: Full(height: null, url: null, width: null),
+            postThumbnail: Full(height: null, url: null, width: null)),
+        event: 0,
+      )
+    ];
+    expect(actualOutput, expectedOutput);
+    await dbHelper.close();
+  });
+  test('setBlogAsRead', () async {
+    Post blogItem = Post(
         id: 1,
         date: "2022-01-01",
         modified: "2022-01-01",
@@ -351,13 +412,13 @@ void main() async {
         commentCount: 10,
         thumbnailImages: Images(),
         event: 2);
-    var actualOutput = await dbHelper.setBlogAsRead(blogItem);
-    var expectedOutput = true;
+    dynamic actualOutput = await dbHelper.setBlogAsRead(blogItem);
+    bool expectedOutput = true;
     expect(actualOutput, expectedOutput);
     await dbHelper.close();
   });
 
-  test("Update From Blog", () async {
+  test("updateBlog", () async {
     BlogModel model = BlogModel(posts: [
       Post(
         id: 1,
@@ -384,39 +445,39 @@ void main() async {
         event: 2,
       ),
     ], count: 1);
-    await dbHelper.updateBlogTable(model, 1);
-    dynamic expectedOuput = [
+    await dbHelper.updateBlog(model, 1);
+    List<Map<dynamic, dynamic>> expectedOuput = [
       {
-        'id': 1,
-        'date': '2022-01-01',
-        'modified': '2022-01-01',
-        'url': null,
-        'title': 'hi',
-        'content': 'content',
-        'excerpt': 'hi excerpt',
-        'thumbnail': 'hi thumbnail',
-        'categories':
+        Blogs.id: 1,
+        Blogs.date: '2022-01-01',
+        Blogs.modified: '2022-01-01',
+        Blogs.url: null,
+        Blogs.title: 'hi',
+        Blogs.content: 'content',
+        Blogs.excerpt: 'hi excerpt',
+        Blogs.thumbnail: 'hi thumbnail',
+        Blogs.categories:
             '[{"id":null,"slug":null,"title":null,"description":null,"parent":null,"post_count":null}]',
-        'tags':
+        Blogs.tags:
             '[{"id":1,"slug":null,"title":"hi","description":null,"parent":null,"post_count":null}]',
-        'author':
+        Blogs.author:
             '{"id":null,"slug":null,"name":null,"first_name":null,"last_name":null,"nickname":null,"url":"www.google.com","description":null}',
-        'comments': '[]',
-        'comment_count': 10,
-        'thumbnail_images':
+        Blogs.comments: '[]',
+        Blogs.comment_count: 10,
+        Blogs.thumbnail_images:
             '{"full":{"url":"https://cdn.pixabay.com/photo/2015/04/23/22/00/tree-736885__480.jpg","width":12,"height":23},"thumbnail":null,"medium":null,"medium_large":null,"large":null,"post-thumbnail":null}',
-        'readdate': '',
-        'isread': 1,
-        'ignore': 0,
-        'event': 0
+        Blogs.readdate: '',
+        Blogs.isread: 1,
+        Blogs.ignore: 0,
+        Blogs.event: 0
       }
     ];
-    var actualOutput = await dbHelper.getFromBlogTable(1);
+    var actualOutput = await dbHelper.getBlogById(1);
     expect(actualOutput, expectedOuput);
     await dbHelper.close();
   });
-  test("Deleted From Table Blog", () async {
-    var actualOutput = await dbHelper.deleteFromTableBlog();
+  test("deleteAllBlog", () async {
+    var actualOutput = await dbHelper.deleteAllBlog();
     dynamic expectedOutput;
     expect(actualOutput, expectedOutput);
   });

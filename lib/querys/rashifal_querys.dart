@@ -3,14 +3,11 @@
 import 'package:nepali_patro_sql_package/models/rasifal_model.dart';
 import 'package:nepali_patro_sql_package/nepali_patro_sql_package.dart';
 import 'package:nepali_patro_sql_package/utils/string_manager.dart';
+import 'package:nepali_patro_sql_package/utils/utils.dart';
 import 'package:sqflite/sqflite.dart';
 
 class RashifalQuerys {
   DatabaseHelper databaseHelper = DatabaseHelper.privateConstructor();
-  Future<int?> insertDataOnRasifalTable(Map<String, dynamic> parameter) async {
-    Database? db = await databaseHelper.database;
-    return await db?.insert(DB_TABLE_RASHIFAL, parameter);
-  }
 
   Future<dynamic> insertRashifal(List<Np> model) async {
     Database? db = await databaseHelper.database;
@@ -41,14 +38,13 @@ class RashifalQuerys {
         return null;
       }
     } catch (e) {
-      // Utils.debugLog(e);
+      Utils.debugLog(e);
       return null;
     }
   }
 
-  Future deleteFromTableRashifal(String tag) async {
+  clearRashifal() async {
     Database? db = await databaseHelper.database;
-    return await db
-        ?.execute("Delete From $DB_TABLE_RASHIFAL where type = '$tag'");
+    return await db?.rawDelete("DELETE FROM $DB_TABLE_RASHIFAL");
   }
 }

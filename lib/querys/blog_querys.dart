@@ -1,18 +1,13 @@
 import 'dart:convert';
-// import 'package:flutter/foundation.dart';
-import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 import 'package:nepali_patro_sql_package/models/blog_model.dart';
 import 'package:nepali_patro_sql_package/nepali_patro_sql_package.dart';
 import 'package:nepali_patro_sql_package/utils/string_manager.dart';
+import 'package:nepali_patro_sql_package/utils/utils.dart';
 import 'package:sqflite/sqflite.dart';
 
 class BlogQuerys {
   DatabaseHelper databaseHelper = DatabaseHelper.privateConstructor();
-  Future deleteFromTableBlog() async {
-    Database? db = await databaseHelper.database;
-    return await db?.execute('Delete From $DB_TABLE_BLOG');
-  }
 
   Future<bool?> insertBlog(BlogModel model) async {
     Database? db = await databaseHelper.database;
@@ -50,17 +45,15 @@ class BlogQuerys {
             0,
             //event
           ]);
-
-          // print(result);
-          // return result;
         } catch (e) {
-          print(e);
+          Utils.debugLog(e);
         }
         return true;
       }
     } catch (e) {
       return false;
     }
+    return false;
   }
 
   Future<bool> updateBlog(BlogModel blogs, int id) async {
@@ -90,8 +83,9 @@ class BlogQuerys {
       var result = db?.rawQuery(query);
       return result;
     } catch (e) {
-      print(e);
+      Utils.debugLog(e);
     }
+    return null;
   }
 
   Future<String> getBlogDateTime(bool latest) async {
@@ -106,11 +100,10 @@ class BlogQuerys {
             "SELECT modified FROM $DB_TABLE_BLOG ORDER BY modified DESC LIMIT 1";
       }
       var result = await db?.rawQuery(query);
-      if (result!.length > 0) {
+      if (result!.isNotEmpty) {
         var parsedDate =
             DateTime.parse(result.toList()[0]["modified"].toString());
         return DateFormat("yyyyMMdd").format(parsedDate);
-        // return
       }
     } catch (e) {
       return "";
@@ -131,32 +124,28 @@ class BlogQuerys {
         String query =
             "SELECT * FROM $DB_TABLE_BLOG WHERE id = '$id' ORDER BY modified DESC";
         var results = await db?.rawQuery(query);
-        // blogLists =
-        //     results?.map((var model) => Post.fromDbJson(model)).toList();
         blogLists = results
             ?.map((Map<String, dynamic> model) => Post.fromDbJson(model))
             .toList();
         return blogLists;
       }
     } catch (e) {
-      // return null;
-      print(e);
+      Utils.debugLog(e);
     }
+    return null;
   }
 
   Future<List<Post>?> loadDailyBlog(String id) async {
     Database? db = await databaseHelper.database;
-//    var ids = id.split(",");
     try {
       List<Post> blogLists = <Post>[];
       String query = "SELECT * FROM $DB_TABLE_BLOG WHERE id in ($id) ";
       var results = await db?.rawQuery(query);
-//      var results = await db.query(DB_TABLE_BLOG,where: "id in (?)",whereArgs: [id]);
       blogLists =
           results!.map((Map model) => Post.fromDbJson(model.cast())).toList();
       return blogLists;
     } catch (e) {
-      print(e);
+      Utils.debugLog(e);
       return null;
     }
   }
@@ -170,7 +159,6 @@ class BlogQuerys {
       var results = await db?.rawQuery(query);
       blogLists =
           results!.map((Map model) => Post.fromDbJson(model.cast())).toList();
-      print("bloglists $blogLists");
       return blogLists;
     } catch (e) {
       return null;
@@ -188,7 +176,7 @@ class BlogQuerys {
           .toList();
       return blogLists;
     } catch (e) {
-      print(e);
+      Utils.debugLog(e);
       return null;
     }
   }
@@ -202,7 +190,6 @@ class BlogQuerys {
         results?.map((Map model) => Post.postsFromJson(results).toList());
 
     return allblogs?.toList();
-    //  return compute(Post.postsFromJson, results);
   }
 
   Future<bool> setBlogAsRead(Post blogItem) async {
@@ -212,8 +199,13 @@ class BlogQuerys {
       await db?.rawQuery(query, [blogItem.id]);
       return true;
     } catch (e) {
-      print(e);
+      Utils.debugLog(e);
     }
     return false;
+  }
+
+  deleteAllBlog() async {
+    Database? db = await databaseHelper.database;
+    await db?.rawDelete("DELETE FROM $DB_TABLE_BLOG");
   }
 }

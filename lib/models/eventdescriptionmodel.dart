@@ -2,7 +2,11 @@
 //
 //     final eventDescriptionModel = eventDescriptionModelFromJson(jsonString);
 
+// ignore_for_file: prefer_if_null_operators, must_be_immutable
+
 import 'dart:convert';
+
+import 'package:equatable/equatable.dart';
 
 EventDescriptionModel eventDescriptionModelFromJson(String str) =>
     EventDescriptionModel.fromJson(json.decode(str));
@@ -12,7 +16,7 @@ EventDescriptionModel eventDescriptionModelEncrypteFromJson(String str) =>
 String eventDescriptionModelToJson(EventDescriptionModel data) =>
     json.encode(data.toJson());
 
-class EventDescriptionModel {
+class EventDescriptionModel extends Equatable {
   String? npId;
   String? category;
   String? en;
@@ -80,4 +84,18 @@ class EventDescriptionModel {
         "gh": gh == null ? null : gh,
         "important_event": importantEvent == null ? null : importantEvent,
       };
+
+  @override
+  List<Object?> get props => [
+        npId,
+        category,
+        en,
+        ne,
+        imageUrl,
+        imageSmallUrl,
+        blogId,
+        blogDescription,
+        gh,
+        importantEvent
+      ];
 }

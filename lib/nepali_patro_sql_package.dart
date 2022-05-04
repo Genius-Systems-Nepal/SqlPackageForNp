@@ -6,31 +6,29 @@ import 'dart:io';
 import 'package:nepali_patro_sql_package/database/database_tables.dart';
 import 'package:nepali_patro_sql_package/models/amessage_model.dart';
 import 'package:nepali_patro_sql_package/models/blog_model.dart';
-import 'package:nepali_patro_sql_package/models/calendareventsmodel.dart';
+import 'package:nepali_patro_sql_package/models/calendar_model.dart';
+import 'package:nepali_patro_sql_package/models/deleteReminderModel.dart';
+import 'package:nepali_patro_sql_package/models/forexmodel.dart';
 import 'package:nepali_patro_sql_package/models/rasifal_model.dart';
+import 'package:nepali_patro_sql_package/models/remindersmodel.dart';
 import 'package:nepali_patro_sql_package/querys/blog_querys.dart';
 import 'package:nepali_patro_sql_package/querys/cachedb_querys.dart';
 import 'package:nepali_patro_sql_package/querys/calendar_querys.dart';
 import 'package:nepali_patro_sql_package/querys/events/deleted_event.dart';
+import 'package:nepali_patro_sql_package/querys/events/event_exception_query.dart';
 import 'package:nepali_patro_sql_package/querys/events/events_querys.dart';
-import 'package:nepali_patro_sql_package/querys/exceptions_querys.dart';
-import 'package:nepali_patro_sql_package/querys/forex/forex_details_querys.dart';
 import 'package:nepali_patro_sql_package/querys/forex/forex_querys.dart';
 import 'package:nepali_patro_sql_package/querys/holidays_querys.dart';
-import 'package:nepali_patro_sql_package/querys/message_querys.dart';
+import 'package:nepali_patro_sql_package/querys/amessage_querys.dart';
 import 'package:nepali_patro_sql_package/querys/panchangadb_querys.dart';
-import 'package:nepali_patro_sql_package/querys/rasifal_querys.dart';
-import 'package:nepali_patro_sql_package/querys/reminders/deleted_reminder_querys.dart';
+import 'package:nepali_patro_sql_package/querys/rashifal_querys.dart';
 import 'package:nepali_patro_sql_package/querys/reminders/reminders_querys.dart';
-import 'package:nepali_patro_sql_package/querys/timesofnepal/bookmark_querys.dart';
-import 'package:nepali_patro_sql_package/querys/timesofnepal/categories_querys.dart';
-import 'package:nepali_patro_sql_package/querys/timesofnepal/feeds_querys.dart';
-import 'package:nepali_patro_sql_package/querys/timesofnepal/related_feeds_querys.dart';
-import 'package:nepali_patro_sql_package/querys/timesofnepal/sources_querys.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
-// import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import 'package:timezone/data/latest.dart' as tz;
+import 'package:nepali_patro_sql_package/models/calendareventsmodel.dart'
+    as prefix0;
 
 class DatabaseHelper {
   final dbName = 'np.db';
@@ -48,14 +46,12 @@ class DatabaseHelper {
 
   _initDatabase() async {
     String dbPath = join(Platform.script.toFilePath(), dbName);
-    // Directory documentsDirectory = await getApplicationDocumentsDirectory();
-    // String dbPath = join(documentsDirectory.path, dbName);
     var theDB = await databaseFactoryFfi.openDatabase(
       dbPath,
       options: OpenDatabaseOptions(
         onOpen: (db) {},
         onCreate: onCreatetable,
-        // onUpgrade: onUpgrade,
+        onUpgrade: onUpgrade,
         version: dbVersion,
       ),
     );
@@ -81,64 +77,49 @@ class DatabaseHelper {
     await _databaseTable.createCacheDbTable(db);
     await _databaseTable.createDeletedEventTable(db);
     await _databaseTable.createDeletedReminderTable(db);
-
-    //................... Times Of Nepal ...................//
-
-    await _databaseTable.createFeedsTable(db);
-    await _databaseTable.createRelatedFeedsTable(db);
-    await _databaseTable.createSourcesTable(db);
-    await _databaseTable.createCategoriesTable(db);
-    await _databaseTable.createBookmarkTable(db);
   }
 
   Future<void> onUpgrade(Database db, int oldv, int newv) async {}
-
-//  .........................simple Test example ...............
-  String reverseString(String initial) {
-    return initial.split('').reversed.join();
+  initializeTimeZone() async {
+    tz.initializeTimeZones();
   }
-  //..........................Rasifal..............................//
+//.........................Rasifal..............................//
 
   insertRasifal(List<Np> model) async {
     RashifalQuerys sql = RashifalQuerys();
     return await sql.insertRashifal(model);
   }
 
-  insertOnRasifalTable(parameter) async {
-    RashifalQuerys sql = RashifalQuerys();
-    return await sql.insertDataOnRasifalTable(parameter);
-  }
-
-  Future<Np?> getFromRasifal(String tag) async {
+  Future<Np?> getRashifalByTag(String tag) async {
     RashifalQuerys sql = RashifalQuerys();
     return await sql.getRashifalByTag(tag);
   }
 
-  deleteFromtableRasifal(String tag) async {
+  clearRashifal() async {
     RashifalQuerys sql = RashifalQuerys();
-    return await sql.deleteFromTableRashifal(tag);
+    return await sql.clearRashifal();
   }
 
   //.................................Blog..................................................//
 
-  insertOnBlogTable(model) async {
+  insertBlog(BlogModel model) async {
     BlogQuerys sql = BlogQuerys();
     return await sql.insertBlog(model);
   }
 
-  updateBlogTable(BlogModel blogs, int id) async {
+  updateBlog(BlogModel blogs, int id) async {
     BlogQuerys sql = BlogQuerys();
     await sql.updateBlog(blogs, id);
   }
 
-  getFromBlogTable(id) async {
+  Future<List<dynamic>?> getBlogById(id) async {
     BlogQuerys sql = BlogQuerys();
     return await sql.getBlogById(id);
   }
 
-  deleteFromTableBlog() async {
+  deleteAllBlog() async {
     BlogQuerys sql = BlogQuerys();
-    return await sql.deleteFromTableBlog();
+    return await sql.deleteAllBlog();
   }
 
   getBlogDateTime(bool latest) async {
@@ -161,6 +142,11 @@ class DatabaseHelper {
     return await sql.loadAllBlogs();
   }
 
+  loadBlogsByDate(String date) async {
+    BlogQuerys sql = BlogQuerys();
+    return await sql.loadBlogsByDate(date);
+  }
+
   setBlogAsRead(blogItem) async {
     BlogQuerys sql = BlogQuerys();
     return await sql.setBlogAsRead(blogItem);
@@ -172,12 +158,12 @@ class DatabaseHelper {
   }
 
   //...................................Message ......................................//
-  insertOrUpdateAMessages(List<Content> content) async {
+  insertAmessages(List<Content> content) async {
     MessageQuerys sql = MessageQuerys();
     await sql.insertAmessages(content);
   }
 
-  updateMessageTable(Content updatedmessage) async {
+  updateAmessage(Content updatedmessage) async {
     MessageQuerys sql = MessageQuerys();
     await sql.updateAmessage(updatedmessage);
   }
@@ -187,41 +173,92 @@ class DatabaseHelper {
     await sql.deleteFromTableMessage();
   }
 
-  Future<Content?> getFromMessage(String id) async {
-    MessageQuerys sql = MessageQuerys();
-    return await sql.getAmessageById(id);
-  }
-
   Future<List<Content?>> getAmessages() async {
     MessageQuerys sql = MessageQuerys();
     return await sql.getAmessages();
   }
 
-  getAmessageById(id) async {
+  Future<Content> getAmessageById(id) async {
     MessageQuerys sql = MessageQuerys();
     return await sql.getAmessageById(id);
   }
 
+  parseAmessage(List<Map<dynamic, dynamic>> args) async {
+    MessageQuerys sql = MessageQuerys();
+    return await sql.parseAmessage(args);
+  }
+
+  cancelAmessage(Content amessage) async {
+    MessageQuerys sql = MessageQuerys();
+    return await sql.cancelAmessage(amessage);
+  }
+
   //............................Calendar.......................................//
-
-  insertOnCalendarTable(parameter) async {
-    CalendarQuerys sql = CalendarQuerys();
-    await sql.insertDataOnCalendarTable(parameter);
-  }
-
-  updateCalendarTable() async {
-    CalendarQuerys sql = CalendarQuerys();
-    await sql.updateForTableCalendar();
-  }
 
   deleteFromTableCalendar() async {
     CalendarQuerys sql = CalendarQuerys();
     await sql.deleteFromTableCalendar();
   }
 
-  getFromCalendar() async {
+  getAllSortedCalendars() async {
     CalendarQuerys sql = CalendarQuerys();
-    return await sql.getFromCalendar();
+    return await sql.getAllSortedCalendars();
+  }
+
+  getCalendarById(id) async {
+    CalendarQuerys sql = CalendarQuerys();
+    return await sql.getCalendarById(id);
+  }
+
+  updateCalendar(Calendar calendar) async {
+    CalendarQuerys sql = CalendarQuerys();
+    return await sql.updateCalendar(calendar);
+  }
+
+  insertCalendars(List<Calendar> calendars) async {
+    CalendarQuerys sql = CalendarQuerys();
+    return await sql.insertCalendars(calendars);
+  }
+
+  deleteCalendars(Calendar calendarItem) async {
+    CalendarQuerys sql = CalendarQuerys();
+    return await sql.deleteCalendars(calendarItem);
+  }
+
+  getsortedCalendar() async {
+    CalendarQuerys sql = CalendarQuerys();
+    return await sql.getsortedCalendar();
+  }
+
+  getSyncPendingCalendars({dynamic loadAll}) async {
+    CalendarQuerys sql = CalendarQuerys();
+    return await sql.getSyncPendingCalendars(loadAll: loadAll);
+  }
+
+  getEnabledDefaultCalendars({defautlCalendar = false}) async {
+    CalendarQuerys sql = CalendarQuerys();
+    return await sql.getEnabledDefaultCalendars(
+        defautlCalendar: defautlCalendar);
+  }
+
+  getEnabledCalendars() async {
+    CalendarQuerys sql = CalendarQuerys();
+    return await sql.getEnabledCalendars();
+  }
+
+  getDisabledCalendars() async {
+    CalendarQuerys sql = CalendarQuerys();
+    return await sql.getDisabledCalendars();
+  }
+
+  updateCalendarPriority(List<Calendar> calendars) async {
+    CalendarQuerys sql = CalendarQuerys();
+    return await sql.updateCalendarPriority(calendars);
+  }
+
+  getCalendarUser() async {
+    CalendarQuerys sql = CalendarQuerys();
+    return await sql.getCalendarUser();
   }
 
   //................................Events..................................................//
@@ -256,14 +293,9 @@ class DatabaseHelper {
     return sql.getEventToday(time);
   }
 
-  disableUserEvent(Event event) async {
+  disableUserEvent(prefix0.Event event) async {
     EventsQuerys sql = EventsQuerys();
     return sql.disableUserEvent(event);
-  }
-
-  deleteuserEventById(id) async {
-    EventsQuerys sql = EventsQuerys();
-    return sql.deleteuserEventById(id);
   }
 
   updateUserEventsAuthority(prevId, newId) async {
@@ -318,15 +350,33 @@ class DatabaseHelper {
     return sql.getSyncPendingEvents();
   }
 
-  getEventsbetweenDates(startDate, endDate) async {
+  getEventsbetweenDates(startDate, endDate, {isBackground = true}) async {
     EventsQuerys sql = EventsQuerys();
-    return sql.getEventsbetweenDates(startDate, endDate);
+    return sql.getEventsbetweenDates(
+      startDate,
+      endDate,
+      isBackground: isBackground,
+    );
+  }
+
+  getRepetitionEventsforMonth(startDate, endDate,
+      {preCalendarId = "", isBackground = true}) async {
+    EventsQuerys sql = EventsQuerys();
+    return sql.getRepetitionEventsforMonth(startDate, endDate,
+        isBackground: isBackground, preCalendarId: preCalendarId);
+  }
+
+  getRepeatedEvents(DateTime startDate, DateTime endDate,
+      {impOnly = false, forceDefCal = false, isBackground = true}) async {
+    EventsQuerys sql = EventsQuerys();
+    return sql.getRepeatedEvents(startDate, endDate,
+        forceDefCal: forceDefCal, impOnly: impOnly, isBackground: isBackground);
   }
   //.....................................Holidays,.....................................//
 
-  insertOnHolidaysTable(parameter) async {
+  insertHolidays(model) async {
     HolidaysQuerys sql = HolidaysQuerys();
-    await sql.insertDataOnHolidaysTable(parameter);
+    await sql.insertHolidays(model);
   }
 
   updateHolidaysTable() async {
@@ -344,92 +394,159 @@ class DatabaseHelper {
     return await sql.getFromHolidays();
   }
 
-  //............................................Exceptions..........................................//
-
-  insertOnExceptionsTable(parameter) async {
-    ExceptionsQuerys sql = ExceptionsQuerys();
-    await sql.insertDataOnExceptionsTable(parameter);
+  deleteHolidays() async {
+    HolidaysQuerys sql = HolidaysQuerys();
+    return await sql.deleteHolidays();
   }
 
-  updateExceptionsTable() async {
-    ExceptionsQuerys sql = ExceptionsQuerys();
-    await sql.updateForTableExceptions();
+  getAllHolidays(DateTime startDate, DateTime endDate) async {
+    HolidaysQuerys sql = HolidaysQuerys();
+    return await sql.getAllHolidays(startDate, endDate);
+  }
+
+  getGovernmentHolidaysFromWeb(DateTime from, DateTime to) async {
+    HolidaysQuerys sql = HolidaysQuerys();
+    return await sql.getGovernmentHolidaysFromWeb(from, to);
+  }
+
+  getGovernmentHolidays(DateTime from, DateTime to) async {
+    HolidaysQuerys sql = HolidaysQuerys();
+    return await sql.getGovernmentHolidays(from, to);
+  }
+  //............................................Exceptions..........................................//
+
+  insertEventException(List<dynamic> exceptionLists) async {
+    EventExceptionQuery sql = EventExceptionQuery();
+    await sql.insertEventException(exceptionLists);
+  }
+
+  getEventExceptionById(id) async {
+    EventExceptionQuery sql = EventExceptionQuery();
+    return await sql.getEventExceptionById(id);
+  }
+
+  deleteUserEvent(prefix0.Event event) async {
+    EventExceptionQuery sql = EventExceptionQuery();
+    return await sql.deleteUserEvent(event);
+  }
+
+  deleteuserEventById(id) async {
+    EventExceptionQuery sql = EventExceptionQuery();
+    return await sql.deleteuserEventById(id);
   }
 
   deleteFromTableExceptions() async {
-    ExceptionsQuerys sql = ExceptionsQuerys();
+    EventExceptionQuery sql = EventExceptionQuery();
     await sql.deleteFromTableExceptions();
   }
-
-  getFromExceptions() async {
-    ExceptionsQuerys sql = ExceptionsQuerys();
-    return await sql.getFromExceptions();
-  }
-
   //............................................Reminders..........................................//
 
-  insertOnRemindersTable(parameter) async {
+  Future<bool> deleteRemindersWithEventid(id) async {
     RemindersQuerys sql = RemindersQuerys();
-    await sql.insertDataOnRemindersTable(parameter);
+    return await sql.deleteRemindersWithEventid(id);
   }
 
-  updateRemindersTable() async {
+  insertReminders(remender) async {
     RemindersQuerys sql = RemindersQuerys();
-    await sql.updateForTableReminders();
+    await sql.insertReminders(remender);
   }
 
-  deleteFromTableReminders() async {
+  Future<RemindersModel?> getReminderById(reminderId) async {
     RemindersQuerys sql = RemindersQuerys();
-    await sql.deleteFromTableReminders();
+    return await sql.getReminderById(reminderId);
   }
 
-  getFromReminders() async {
+  deleteUserReminders(RemindersModel remindersModel) async {
     RemindersQuerys sql = RemindersQuerys();
-    return await sql.getFromReminders();
+    return await sql.deleteUserReminders(remindersModel);
   }
 
+  insertRemindersList(List<RemindersModel> reminderslists) async {
+    RemindersQuerys sql = RemindersQuerys();
+    return await sql.insertRemindersList(reminderslists);
+  }
+
+  Future<List<Map<dynamic, dynamic>>?> getRemindersByEventId(eventId) async {
+    RemindersQuerys sql = RemindersQuerys();
+    return await sql.getRemindersByEventId(eventId);
+  }
+
+  updateReminderWithMap(parameter) async {
+    RemindersQuerys sql = RemindersQuerys();
+    return await sql.updateReminderWithMap(parameter);
+  }
+
+  udpateReminder(RemindersModel reminderItem) async {
+    RemindersQuerys sql = RemindersQuerys();
+    return await sql.updateReminder(reminderItem);
+  }
+
+  Future<List<DeleteReminderModel>> getSyncDeletedReminders(
+      {loadAll, String? time}) async {
+    RemindersQuerys sql = RemindersQuerys();
+    return await sql.getSyncDeletedReminders(loadAll: loadAll, time: time);
+  }
+
+  getSyncPendingReminders({loadAll, syncTime}) async {
+    RemindersQuerys sql = RemindersQuerys();
+    return await sql.getSyncPendingReminders(
+        loadAll: loadAll, syncTime: syncTime);
+  }
+
+  deleteUserRemindersFromReminderId(String deleteReminderModel) async {
+    RemindersQuerys sql = RemindersQuerys();
+    return await sql.deleteUserRemindersFromReminderId(deleteReminderModel);
+  }
+
+  deleteDeletedReminders() async {
+    RemindersQuerys sql = RemindersQuerys();
+    return await sql.deleteDeletedReminders();
+  }
   //............................................Forex..........................................//
 
-  insertOnForexTable(parameter) async {
+  insertToForexDetail(int id, ForexModel model) async {
     ForexQuerys sql = ForexQuerys();
-    await sql.insertDataOnForexTable(parameter);
+    return await sql.insertToForexDetail(id, model);
   }
 
-  updateForexTable() async {
+  insertForex(ForexModel model) async {
     ForexQuerys sql = ForexQuerys();
-    await sql.updateForTableForex();
+    return await sql.insertForex(model);
   }
 
-  deleteFromTableForex() async {
+  insertToForex(String formatedDate, ForexModel model) async {
     ForexQuerys sql = ForexQuerys();
-    await sql.deleteFromTableForex();
+    return await sql.insertToForex(formatedDate, model);
   }
 
-  getFromForex() async {
+  deleteForex(String date) async {
     ForexQuerys sql = ForexQuerys();
-    return await sql.getFromForex();
+    return await sql.deleteForex(date);
   }
 
-  //............................................ForexDetails..........................................//
-
-  insertOnForexDetailsTable(parameter) async {
-    ForexDetailsQuerys sql = ForexDetailsQuerys();
-    await sql.insertDataOnForexDetailsTable(parameter);
+  deleteForexDetails() async {
+    ForexQuerys sql = ForexQuerys();
+    return await sql.deleteForexDetails();
   }
 
-  updateForexDetailsTable() async {
-    ForexDetailsQuerys sql = ForexDetailsQuerys();
-    await sql.updateForTableForexDetails();
+  forexCount() async {
+    ForexQuerys sql = ForexQuerys();
+    return await sql.forexCount();
   }
 
-  deleteFromTableForexDetails() async {
-    ForexDetailsQuerys sql = ForexDetailsQuerys();
-    await sql.deleteFromTableForexDetails();
+  getForex() async {
+    ForexQuerys sql = ForexQuerys();
+    return await sql.forexCount();
   }
 
-  getFromForexDetails() async {
-    ForexDetailsQuerys sql = ForexDetailsQuerys();
-    return await sql.getFromForexDetails();
+  latestForex() async {
+    ForexQuerys sql = ForexQuerys();
+    return await sql.latestForex();
+  }
+
+  getForexDetail(int forexId) async {
+    ForexQuerys sql = ForexQuerys();
+    return await sql.getForexDetail(forexId);
   }
 
   //............................................PanchangaDb..........................................//
@@ -438,12 +555,12 @@ class DatabaseHelper {
       String np, String en, String ddNp, String ddEn, String date,
       {id}) async {
     PanchangaDbQuerys sql = PanchangaDbQuerys();
-    await sql.insertPanchangaData(np, en, ddNp, ddEn, date);
+    return await sql.insertPanchangaData(np, en, ddNp, ddEn, date);
   }
 
   deleteFromTablePanchangaDb() async {
     PanchangaDbQuerys sql = PanchangaDbQuerys();
-    await sql.deleteFromTablePanchangaDb();
+    return await sql.deleteFromTablePanchangaDb();
   }
 
   getPanchangaByDate(String date) async {
@@ -453,14 +570,14 @@ class DatabaseHelper {
 
   //............................................CacheDb..........................................//
 
-  insertOnCacheDbTable(parameter) async {
+  insertCache(parameter) async {
     CacheDbQuerys sql = CacheDbQuerys();
-    await sql.insertDataOnCacheDbTable(parameter);
+    return await sql.insertCache(parameter);
   }
 
-  updateCacheDbTable() async {
+  insertCacheById(dynamic nsDataResult, {int? addKey}) async {
     CacheDbQuerys sql = CacheDbQuerys();
-    await sql.updateForTableCacheDb();
+    return await sql.insertCacheById(nsDataResult, addKey: addKey);
   }
 
   deleteFromTableCacheDb() async {
@@ -468,21 +585,76 @@ class DatabaseHelper {
     await sql.deleteFromTableCacheDb();
   }
 
-  getFromCacheDb() async {
+  Future<List<Map<String, Object?>>> getCacheByEventId(id, date) async {
     CacheDbQuerys sql = CacheDbQuerys();
-    return await sql.getFromCacheDb();
+    return await sql.getCacheByEventId(id, date);
+  }
+
+  getCachebetweenDates(DateTime from, DateTime to,
+      {calendarIds = "", impOnly = false, isBackground = true}) async {
+    CacheDbQuerys sql = CacheDbQuerys();
+    return await sql.getCachebetweenDates(from, to,
+        calendarIds: calendarIds, impOnly: impOnly, isBackground: isBackground);
+  }
+
+  getCacheCount() async {
+    CacheDbQuerys sql = CacheDbQuerys();
+    return await sql.getCacheCount();
+  }
+
+  getCachedYear(String from, String to) async {
+    CacheDbQuerys sql = CacheDbQuerys();
+    return await sql.getCachedYear(from, to);
+  }
+
+  getInvalidCache(DateTime from, DateTime to, {DateTime? startAdDate}) async {
+    CacheDbQuerys sql = CacheDbQuerys();
+    return await sql.getInvalidCache(from, to, startAdDate: startAdDate);
+  }
+
+  deleteSingleDateFromCache(String eventId, DateTime fromDate) async {
+    CacheDbQuerys sql = CacheDbQuerys();
+    return await sql.deleteSingleDateFromCache(eventId, fromDate);
+  }
+
+  deleteAllDefaultCalCache() async {
+    CacheDbQuerys sql = CacheDbQuerys();
+    return await sql.deleteAllDefaultCalCache();
+  }
+
+  deleteFutureDateFromCache(String eventId, DateTime fromDate) async {
+    CacheDbQuerys sql = CacheDbQuerys();
+    return await sql.deleteFutureDateFromCache(eventId, fromDate);
+  }
+
+  deleteCache(String eventId) async {
+    CacheDbQuerys sql = CacheDbQuerys();
+    return await sql.deleteCache(eventId);
+  }
+
+  deleteNepaliCalendarCache() async {
+    CacheDbQuerys sql = CacheDbQuerys();
+    return await sql.deleteNepaliCalendarCache();
+  }
+
+  getRepetitionEventsCache(List<prefix0.Event> events, startDate, endDate,
+      {forceGenerate = false}) async {
+    CacheDbQuerys sql = CacheDbQuerys();
+    return await sql.getRepetitionEventsCache(events, startDate, endDate,
+        forceGenerate: forceGenerate);
+  }
+
+  getNonCacheEventOfYear(DateTime startDate, DateTime endDate,
+      {isBackground = true}) async {
+    CacheDbQuerys sql = CacheDbQuerys();
+    return await sql.getNonCacheEventOfYear(startDate, endDate);
   }
 
   //............................................deletedevent...........................................//
 
-  insertOnDeletedEventTable(parameter) async {
+  insertDeleteEvents(events) async {
     DeletedEventQuerys sql = DeletedEventQuerys();
-    await sql.insertDataOnDeletedEventTable(parameter);
-  }
-
-  updateDeletedEventTable() async {
-    DeletedEventQuerys sql = DeletedEventQuerys();
-    await sql.updateForTableDeletedEvent();
+    return await sql.insertDeleteEvents(events);
   }
 
   deleteFromTableDeletedEvent() async {
@@ -495,134 +667,15 @@ class DatabaseHelper {
     return await sql.getFromDeletedEvent();
   }
 
-  //............................................deletedReminder...........................................//
-
-  insertOnDeletedReminderTable(parameter) async {
-    DeletedReminderQuerys sql = DeletedReminderQuerys();
-    await sql.insertDataOnDeletedReminderTable(parameter);
+  Future getSyncDeletedEvents({dynamic loadAll, String? synctimestamps}) async {
+    DeletedEventQuerys sql = DeletedEventQuerys();
+    return await sql.getSyncDeletedEvents(
+        loadAll: loadAll, synctimestamps: synctimestamps);
   }
 
-  updateDeletedReminderTable() async {
-    DeletedReminderQuerys sql = DeletedReminderQuerys();
-    await sql.updateForTableDeletedReminder();
-  }
-
-  deleteFromTableDeletedReminder() async {
-    DeletedReminderQuerys sql = DeletedReminderQuerys();
-    await sql.deleteFromTableDeletedReminder();
-  }
-
-  getFromDeletedReminder() async {
-    DeletedReminderQuerys sql = DeletedReminderQuerys();
-    return await sql.getFromDeletedReminder();
-  }
-
-  //............................................FeedsTable...........................................//
-
-  insertOnFeedsTable(parameter) async {
-    FeedsQuerys sql = FeedsQuerys();
-    await sql.insertDataOnFeedsTable(parameter);
-  }
-
-  updateFeedsTable() async {
-    FeedsQuerys sql = FeedsQuerys();
-    await sql.updateForTableFeeds();
-  }
-
-  deleteFromTableFeeds() async {
-    FeedsQuerys sql = FeedsQuerys();
-    await sql.deleteFromTableFeeds();
-  }
-
-  getFromFeeds() async {
-    FeedsQuerys sql = FeedsQuerys();
-    return await sql.getFromFeeds();
-  }
-
-  //............................................RelatedFeedsTable...........................................//
-
-  insertOnRelatedFeedsTable(parameter) async {
-    RelatedFeedsQuerys sql = RelatedFeedsQuerys();
-    await sql.insertDataOnRelatedFeedsTable(parameter);
-  }
-
-  updateRelatedFeedsTable() async {
-    RelatedFeedsQuerys sql = RelatedFeedsQuerys();
-    await sql.updateForTableRelatedFeeds();
-  }
-
-  deleteFromTableRelatedFeeds() async {
-    RelatedFeedsQuerys sql = RelatedFeedsQuerys();
-    await sql.deleteFromTableRelatedFeeds();
-  }
-
-  getFromRelatedFeeds() async {
-    RelatedFeedsQuerys sql = RelatedFeedsQuerys();
-    return await sql.getFromRelatedFeeds();
-  }
-
-  //............................................RelatedFeedsTable...........................................//
-
-  insertOnSourcesTable(parameter) async {
-    SourcesQuerys sql = SourcesQuerys();
-    await sql.insertDataOnSourcesTable(parameter);
-  }
-
-  updateSourcesTable() async {
-    SourcesQuerys sql = SourcesQuerys();
-    await sql.updateForTableSources();
-  }
-
-  deleteFromTableSources() async {
-    SourcesQuerys sql = SourcesQuerys();
-    await sql.deleteFromTableSources();
-  }
-
-  getFromSources() async {
-    SourcesQuerys sql = SourcesQuerys();
-    return await sql.getFromSources();
-  }
-
-  //............................................Categories Table...........................................//
-
-  insertOnCategoriesTable(parameter) async {
-    CategoriesQuerys sql = CategoriesQuerys();
-    await sql.insertDataOnCategoriesTable(parameter);
-  }
-
-  updateCategoriesTable() async {
-    CategoriesQuerys sql = CategoriesQuerys();
-    await sql.updateForTableCategories();
-  }
-
-  deleteFromTableCategories() async {
-    CategoriesQuerys sql = CategoriesQuerys();
-    await sql.deleteFromTableCategories();
-  }
-
-  getFromCategories() async {
-    CategoriesQuerys sql = CategoriesQuerys();
-    return await sql.getFromCategories();
-  }
-//............................................BookMark Table...........................................//
-
-  insertOnBookMarkTable(parameter) async {
-    BookMarkQuerys sql = BookMarkQuerys();
-    await sql.insertDataOnBookMarkTable(parameter);
-  }
-
-  updateBookMarkTable() async {
-    BookMarkQuerys sql = BookMarkQuerys();
-    await sql.updateForTableBookMark();
-  }
-
-  deleteFromTableBookMark() async {
-    BookMarkQuerys sql = BookMarkQuerys();
-    await sql.deleteFromTableBookMark();
-  }
-
-  getFromBookMark() async {
-    BookMarkQuerys sql = BookMarkQuerys();
-    return await sql.getFromBookMark();
+  getSyncPendingDeletedEvents({loadAll, String? synctimestamps}) async {
+    DeletedEventQuerys sql = DeletedEventQuerys();
+    return await sql.getSyncPendingDeletedEvents(
+        loadAll: loadAll, synctimestamps: synctimestamps);
   }
 }

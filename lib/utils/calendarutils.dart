@@ -1,8 +1,16 @@
 // import 'package:intl/intl.dart';
 
+// ignore_for_file: non_constant_identifier_names, prefer_const_declarations
+
 import 'package:intl/intl.dart';
+import 'package:nepali_patro_sql_package/utils/constants.dart';
+import 'package:nepali_patro_sql_package/utils/dateconverter/bsdate.dart';
+import 'package:nepali_patro_sql_package/utils/dateconverter/datemapping.dart';
 import 'package:nepali_patro_sql_package/utils/timezone.dart';
 import 'package:nepali_patro_sql_package/utils/utils.dart';
+
+final String CONSTANTS_LOCALE_NEPALI = "ne";
+final String CONSTANTS_LOCALE_ENGLISH = "en";
 
 class CalendarUtils {
   static DateTime getCalendarFromStringFormat(String input, String format) {
@@ -32,6 +40,95 @@ class CalendarUtils {
   static String formatCalendar(DateTime calendar, String format) {
     DateFormat df = DateFormat(format);
     return df.format(calendar);
+  }
+
+  static DateTime getCalendarFromString(String input, {toUtc = false}) {
+    DateTime calendar = Timezone().curDateTimeByZone("NPT");
+    try {
+      calendar = DateTime.parse(input);
+      calendar = Timezone().curDateTimeByZone("npt", dateTime: calendar);
+    } catch (e) {
+      Utils.debugLog(e);
+    }
+    return calendar;
+  }
+
+  static DATE_TYPE getEventRepetitionType(type) {
+    if (type == "AD") {
+      return DATE_TYPE.AD;
+    } else if (type == "BS") {
+      return DATE_TYPE.BS;
+    } else {
+      return DATE_TYPE.NS;
+    }
+  }
+
+  static int getDayDiff(DateTime startDate, DateTime endDate) {
+    Duration diff;
+    endDate = DateTime(endDate.year, endDate.month, endDate.day);
+    diff = endDate.difference(startDate);
+    return diff.inDays;
+  }
+
+  static getRecurrenceRuleWeekofDay(String ruleKeyList) {
+    switch (ruleKeyList) {
+      case "SU":
+        return 0;
+      case "MO":
+        return 1;
+      case "TU":
+        return 2;
+      case "WE":
+        return 3;
+      case "TH":
+        return 4;
+      case "FR":
+        return 5;
+      case "SA":
+        return 6;
+    }
+    return 0;
+  }
+
+  static DateTime addDays(DateTime date, int days) {
+//    var resultDate = date.add(Duration(days: days));
+    return Timezone().curDateTimeByZone("npt",
+        dateTime: DateTime.utc(date.year, date.month, date.day + days));
+  }
+
+  static int? getDaysBetween(DateTime? d1, DateTime? d2, bool abs) {
+    // d2 = DateTime(d2!.year, d2.month, d2.day);
+    if (abs && d1 != null) {
+      d1 = DateTime.utc(d1.year, d1.month, d1.day);
+      d2 = DateTime.utc(d2!.year, d2.month, d2.day);
+      if (d1.isAfter(d2)) {
+        // swap dates so that d1 is start and d2 is end
+        DateTime? swap = d1;
+        d1 = d2;
+        d2 = swap;
+      }
+    }
+    // Duration difference = d2.difference(d1!);
+    return d2?.difference(d1!).inDays;
+    // return difference.inDays;
+  }
+
+  static addMonth(DateTime date, int months, {DateTime? startAdDate}) {
+    var dateMapping = DateMapping();
+
+    var bsDate = dateMapping.getBs(date, startAdDate: startAdDate);
+    var tempBsDate = BsDate(bsDate.year, bsDate.month, 1);
+    var addedMonth = DateMapping().addMonthInBs(tempBsDate, months);
+    return addedMonth.getAd();
+    /*  DateTime calculatedTime =
+    new DateTime(date.year, date.month + months, date.day, 1);
+    BsDate bsDate = DateMapping().getBs(calculatedTime);
+    int maxBsDays =
+    DateMapping.numberOfDaysInBsMonth(bsDate.year, bsDate.month);
+    if (bsDate.day <=5 || bsDate.day > maxBsDays) {
+      calculatedTime = new DateTime(date.year, date.month + months + 1, 01, 1);
+    }
+    return calculatedTime;*/
   }
 }
 // class CalendarUtils {
@@ -159,16 +256,6 @@ class CalendarUtils {
 // //     }
 // //   }
 
-// //   static DateTime getCalendarFromString(String input, {toUtc: false}) {
-// //     DateTime calendar = Timezone().curDateTimeByZone("NPT");
-// //     try {
-// //       calendar = DateTime.parse(input);
-// // //      calendar = Timezone().curDateTimeByZone("npt",dateTime: calendar);
-// //     } catch (e) {
-// //       Utils.debugLog(e);
-// //     }
-// //     return calendar;
-// //   }
 
 // //   static DateTime getCalendarFromStringFormat(String input, String format) {
 // //     DateTime calendar = Timezone().curDateTimeByZone("NPT");

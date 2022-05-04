@@ -1,6 +1,6 @@
 // ignore_for_file: prefer_const_declarations, non_constant_identifier_names
 
-class RasifalTable {
+class Rashifaldb {
   static final type = 'type';
   static final title = 'title';
   static final author = 'author';
@@ -20,7 +20,7 @@ class RasifalTable {
   static final todate = 'todate';
 }
 
-class BlogTable {
+class Blogs {
   static final id = 'id';
   static final date = 'date';
   static final modified = 'modified';
@@ -41,7 +41,7 @@ class BlogTable {
   static final event = 'event';
 }
 
-class CalendarTable {
+class CalendarDb {
   static final id = 'id';
   static final name = 'name';
   static final status = 'status';
@@ -56,7 +56,7 @@ class CalendarTable {
   static final display = 'display';
 }
 
-class AMessageTable {
+class AMessageDb {
   static final id = 'id';
   static final message_np = 'message_np';
   static final message_en = 'message_en';
@@ -73,7 +73,7 @@ class AMessageTable {
   static final cancelled = 'cancelled';
 }
 
-class EventsTable {
+class EventsDb {
   static final id = 'id';
   static final parent_event_id = 'parent_event_id';
   static final title = 'title';
@@ -108,7 +108,7 @@ class EventsTable {
   static final origid = 'origid';
 }
 
-class HolidaysTable {
+class HolidaysDb {
   static final id = 'id';
   static final eventId = 'eventId';
   static final eventDate = 'eventDate';
@@ -119,7 +119,7 @@ class HolidaysTable {
   static final deletedAt = 'deletedAt';
 }
 
-class ExceptionsTable {
+class EventsExcDb {
   static final id = 'id';
   static final exception_date = 'exception_date';
   static final new_date = 'new_date';
@@ -129,7 +129,7 @@ class ExceptionsTable {
   static final calendar_id = 'calendar_id';
 }
 
-class RemindersTable {
+class RemindersDb {
   static final id = 'id';
   static final event_id = 'event_id';
   static final days = 'days';
@@ -140,14 +140,14 @@ class RemindersTable {
   static final created_at = 'created_at';
 }
 
-class ForexTable {
+class Forex {
   static final id = 'id';
   static final fordate = 'fordate';
   static final source = 'source';
   static final source_url = 'source_url';
 }
 
-class ForexDetailTable {
+class ForexDetail {
   static final id = 'id';
   static final pid = 'pid';
   static final type = 'type';
@@ -167,7 +167,7 @@ class PanchangaDb {
   static final text_dden = 'text_dden';
 }
 
-class CacheDb {
+class Cache {
   static final id = 'id';
   static final date = 'date';
   static final event_id = 'event_id';
@@ -175,7 +175,7 @@ class CacheDb {
   static final updated_at = 'updated_at';
 }
 
-class DeletedEvent {
+class DeleteEventsDB {
   static final id = 'id';
   static final event_id = 'event_id';
   static final calendar_id = 'calendar_id';
@@ -183,97 +183,10 @@ class DeletedEvent {
   static final updated_at = 'updated_at';
 }
 
-class DeletedReminder {
+class DeleteRemindersDB {
   static final id = 'id';
   static final reminder_id = 'reminder_id';
   static final event_id = 'event_id';
   static final created_at = 'created_at';
   static final updated_at = 'updated_at';
-}
-
-//##.....................Times Of Nepal ................................##//
-
-class FeedsTable {
-  static final id = 'id';
-  static final newsId = 'newsId';
-  static final title = 'title';
-  static final description = 'description';
-  static final content = 'content';
-  static final link = 'link';
-  static final enclosure_url = 'enclosure_url';
-  static final enclosure_type = 'enclosure_type';
-  static final source = 'source';
-  static final category = 'category';
-  static final author = 'author';
-  static final image = 'image';
-  static final uuid = 'uuid';
-  static final fetchDate = 'fetchDate';
-  static final pub_date = 'pub_date';
-  static final update_date = 'update_date';
-  static final read = 'read';
-  static final bookmarked = 'bookmarked';
-}
-
-class RelatedFeedsTable {
-  static final id = 'id';
-  static final pId = 'pId';
-  static final title = 'title';
-  static final description = 'description';
-  static final content = 'content';
-  static final link = 'link';
-  static final enclosure_url = 'enclosure_url';
-  static final enclosure_type = 'enclosure_type';
-  static final source = 'source';
-  static final category = 'category';
-  static final author = 'author';
-  static final image = 'image';
-  static final uuid = 'uuid';
-  static final fetchDate = 'fetchDate';
-  static final pub_date = 'pub_date';
-  static final update_date = 'update_date';
-  static final read = 'read';
-  static final bookmarked = 'bookmarked';
-}
-
-class SourcesTable {
-  static final id = 'id';
-  static final name = 'name';
-  static final name_np = 'name_np';
-  static final code = 'code';
-  static final icon = 'icon';
-  static final lang = 'lang';
-  static final priority = 'priority';
-  static final favicon = 'favicon';
-  static final ga = 'ga';
-}
-
-class CategoriesTable {
-  static final id = 'id';
-  static final name = 'name';
-  static final name_np = 'name_np';
-  static final code = 'code';
-  static final icon = 'icon';
-  static final enable = 'enable';
-  static final priority = 'priority';
-}
-
-class BookmarkTable {
-  static final id = 'id';
-  static final pId = 'pId';
-  static final title = 'title';
-  static final description = 'description';
-  static final content = 'content';
-  static final link = 'link';
-  static final enclosure_url = 'enclosure_url';
-  static final enclosure_type = 'enclosure_type';
-  static final source = 'source';
-  static final category = 'category';
-  static final author = 'author';
-  static final image = 'image';
-  static final uuid = 'uuid';
-  static final fetchDate = 'fetchDate';
-  static final pub_date = 'pub_date';
-  static final update_date = 'update_date';
-  static final read = 'read';
-  static final bookmarked = 'bookmarked';
 }

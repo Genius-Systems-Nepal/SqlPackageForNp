@@ -1,6 +1,4 @@
-// To parse this JSON data, do
-//
-//     final blogDetail = blogDetailFromJson(jsonString);
+// ignore_for_file: must_be_immutable, prefer_null_aware_operators, prefer_const_constructors_in_immutables
 
 import 'dart:convert';
 
@@ -64,7 +62,6 @@ class BlogModel extends Equatable {
       hashValues(status, count, countTotal, pages, posts, query);
 
   @override
-  // TODO: implement props
   List<Object?> get props => throw UnimplementedError();
 }
 
@@ -253,7 +250,6 @@ class Post extends Equatable {
         "event": event,
       };
   @override
-  // TODO: implement props
   List<Object?> get props => [
         id,
         type,
@@ -329,7 +325,6 @@ class Attachment extends Equatable {
       };
 
   @override
-  // TODO: implement props
   List<Object?> get props =>
       [id, url, slug, title, description, caption, parent, mimeType, images];
 }
@@ -370,7 +365,6 @@ class Images extends Equatable {
       };
 
   @override
-  // TODO: implement props
   List<Object?> get props =>
       [full, thumbnail, medium, mediumLarge, large, postThumbnail];
 }
@@ -411,7 +405,6 @@ class Full extends Equatable {
   int get hashCode => hashValues(url, width, height);
 
   @override
-  // TODO: implement props
   List<Object?> get props => [url, width, height];
 }
 
@@ -459,7 +452,6 @@ class Author extends Equatable {
       };
 
   @override
-  // TODO: implement props
   List<Object?> get props =>
       [id, slug, name, firstName, lastName, nickname, url, description];
 }
@@ -500,7 +492,6 @@ class Category extends Equatable {
       };
 
   @override
-  // TODO: implement props
   List<Object?> get props => [id, slug, title, description, parent, postCount];
 }
 
@@ -544,7 +535,6 @@ class Comment extends Equatable {
       };
 
   @override
-  // TODO: implement props
   List<Object?> get props => [id, name, url, date, content, parent, author];
 }
 
@@ -556,7 +546,6 @@ class CustomFields extends Equatable {
   Map<String, dynamic> toJson() => {};
 
   @override
-  // TODO: implement props
   List<Object?> get props => throw UnimplementedError();
 }
 
@@ -598,7 +587,6 @@ class Query extends Equatable {
       };
 
   @override
-  // TODO: implement props
   List<Object?> get props =>
       [ignoreStickyPosts, postIn, count, exclude, postType, orderby];
 }

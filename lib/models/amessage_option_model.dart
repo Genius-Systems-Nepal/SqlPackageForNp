@@ -1,7 +1,4 @@
-// To parse this JSON data, do
-//
-//     final aMessageOption = aMessageOptionFromJson(jsonString);
-// ignore_for_file: non_constant_identifier_names, prefer_if_null_operators, prefer_null_aware_operators
+// ignore_for_file: non_constant_identifier_names, prefer_null_aware_operators, must_be_immutable
 
 import 'dart:convert';
 import 'package:equatable/equatable.dart';
@@ -29,22 +26,18 @@ class AMessageOption extends Equatable {
       title: json["title"] == null ? null : Title.fromJson(json["title"]),
       subtitle:
           json["subtitle"] == null ? null : Title.fromJson(json["subtitle"]),
-      thumbnail: json["thumbnail"] == null ? null : json["thumbnail"],
-      footer_action_text: json["footer_action_text"] == null
-          ? null
-          : json["footer_action_text"],
-      image: json["image"] == null ? null : json["image"]);
+      thumbnail: json["thumbnail"],
+      footer_action_text: json["footer_action_text"],
+      image: json["image"]);
 
   Map<String, dynamic> toJson() => {
         "title": title == null ? null : title?.toJson(),
         "subtitle": subtitle == null ? null : subtitle?.toJson(),
-        "thumbnail": thumbnail == null ? null : thumbnail,
-        "footer_action_text":
-            footer_action_text == null ? null : footer_action_text,
-        "image": image == null ? null : image
+        "thumbnail": thumbnail,
+        "footer_action_text": footer_action_text,
+        "image": image
       };
   @override
-  // TODO: implement props
   List<Object?> get props =>
       [title, subtitle, thumbnail, footer_action_text, image];
 }
@@ -59,16 +52,15 @@ class Title extends Equatable {
   });
 
   factory Title.fromJson(Map<String, dynamic> json) => Title(
-        en: json["en"] == null ? null : json["en"],
-        np: json["np"] == null ? null : json["np"],
+        en: json["en"],
+        np: json["np"],
       );
 
   Map<String, dynamic> toJson() => {
-        "en": en == null ? null : en,
-        "np": np == null ? null : np,
+        "en": en,
+        "np": np,
       };
 
   @override
-  // TODO: implement props
   List<Object?> get props => [en, np];
 }

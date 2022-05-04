@@ -1,11 +1,10 @@
-// ignore_for_file: avoid_print, prefer_is_empty
-
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:nepali_patro_sql_package/models/amessage_model.dart';
 import 'package:nepali_patro_sql_package/nepali_patro_sql_package.dart';
 import 'package:nepali_patro_sql_package/utils/string_manager.dart';
+import 'package:nepali_patro_sql_package/utils/utils.dart';
 import 'package:sqflite/sqflite.dart';
 
 class MessageQuerys {
@@ -26,10 +25,10 @@ class MessageQuerys {
         }
       }
       String query =
-          "DELETE FROM AMessageTable where id not in ( ${ids.join(" , ")} )";
+          "DELETE FROM $DB_TABLE_AMESSAGE where id not in ( ${ids.join(" , ")} )";
       await db?.rawQuery(query);
     } catch (e) {
-      print(e);
+      Utils.debugLog(e);
       return;
     }
   }
@@ -41,18 +40,15 @@ class MessageQuerys {
     }
     try {
       Database? db = await databaseHelper.database;
-
       for (var item in newAMessage.toJson().entries) {
         if (item.value != null) {
           oldAMessageMap[item.key] = item.value;
         }
       }
-
       var result = await db?.update(DB_TABLE_AMESSAGE, oldAMessageMap);
-
       return result ?? 0;
     } catch (e) {
-      print(e);
+      Utils.debugLog(e);
     }
     return 0;
   }
@@ -66,41 +62,28 @@ class MessageQuerys {
       var amessageList =
           results.map((var model) => Content.fromDbJson(model)).toList();
 
-      if (amessageList.length > 0) {
+      if (amessageList.isNotEmpty) {
         return amessageList[0];
       } else {
         return null;
       }
     } catch (e) {
-      print(e);
+      Utils.debugLog(e);
       return null;
     }
   }
 
   Future<List<Content>> getAmessages() async {
     Database? db = await databaseHelper.database;
-    // var query =
-    //     "SELECT * FROM $DB_TABLE_AMESSAGE WHERE cancelled='0' and (expiry - (strftime('%s', datetime('now'), 'utc') - strftime('%s', datetime(stdate),'utc'))) > 0  ORDER BY dorder*1 ASC";
     var query = "SELECT * FROM $DB_TABLE_AMESSAGE";
     List<Content> finalAmessages = [];
     List<Map> results = await db!.rawQuery(query);
     try {
       finalAmessages = await compute(parseAmessage, results);
     } catch (e) {
-      // Utils.debugLog(e);
+      Utils.debugLog(e);
     }
     return finalAmessages;
-  }
-
-  List<Content> parseAmessage(List<Map> args) {
-    List<Content> amessages =
-        args.map((Map model) => Content.fromDbJson(model.cast())).toList();
-    return amessages;
-  }
-
-  Future deleteFromTableMessage() async {
-    Database? db = await databaseHelper.database;
-    return await db?.execute('Delete From $DB_TABLE_AMESSAGE');
   }
 
   Future<bool> cancelAmessage(Content amessage) async {
@@ -126,8 +109,19 @@ class MessageQuerys {
       ]);
       return true;
     } catch (e) {
-      print(e);
+      Utils.debugLog(e);
       return false;
     }
+  }
+
+  Future<List<Content>> parseAmessage(List<Map> args) async {
+    List<Content> amessages =
+        args.map((Map model) => Content.fromDbJson(model.cast())).toList();
+    return amessages;
+  }
+
+  Future deleteFromTableMessage() async {
+    Database? db = await databaseHelper.database;
+    return await db?.execute('Delete From $DB_TABLE_AMESSAGE');
   }
 }

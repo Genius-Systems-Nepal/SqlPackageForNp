@@ -1,14 +1,16 @@
-// ignore_for_file: unnecessary_null_comparison
+// ignore_for_file: unnecessary_null_comparison, deprecated_member_use, prefer_conditional_assignment, unused_local_variable, prefer_typing_uninitialized_variables
 
-import 'dart:io';
-
+import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/foundation.dart';
-import 'package:nepali_patro_sql_package/models/calendar_model.dart';
+import 'package:nepali_patro_sql_package/custom/npcachemanager.dart';
 import 'package:nepali_patro_sql_package/models/eventdescriptionmodel.dart';
+import 'package:nepali_patro_sql_package/models/eventexceptionmodel.dart';
 import 'package:nepali_patro_sql_package/nepali_patro_sql_package.dart';
+import 'package:nepali_patro_sql_package/utils/calendarutils.dart';
 import 'package:nepali_patro_sql_package/utils/constants.dart';
-import 'package:nepali_patro_sql_package/utils/decoder.dart';
+import 'package:nepali_patro_sql_package/utils/dateconverter/recurrencerulehelper.dart';
 import 'package:nepali_patro_sql_package/utils/prefsutils.dart';
+import 'package:nepali_patro_sql_package/utils/remoteconfigconstants.dart';
 import 'package:nepali_patro_sql_package/utils/string_manager.dart';
 import 'package:nepali_patro_sql_package/utils/timezone.dart';
 import 'package:nepali_patro_sql_package/utils/utils.dart';
@@ -18,10 +20,6 @@ import 'package:sqflite/sqflite.dart';
 
 class EventsQuerys {
   DatabaseHelper databaseHelper = DatabaseHelper.privateConstructor();
-  Future deleteFromTableEvents() async {
-    Database? db = await databaseHelper.database;
-    return await db?.execute('Delete From $DB_TABLE_EVENTS ');
-  }
 
   Future<bool> insertEvents(List events, forceUpdate,
       {needEncryption = true}) async {
@@ -47,7 +45,6 @@ class EventsQuerys {
           var eventFromDb = await getCalendarEventbyId(event.id!);
           event.gh = int.tryParse(gh) ?? 0;
           event.imp = int.tryParse(imp) ?? 0;
-          // ignore: prefer_conditional_assignment
           if (event.calendar_id == null) {
             event.calendar_id = "105";
           }
@@ -102,7 +99,7 @@ class EventsQuerys {
       List<dynamic> eventLists = results
           .map((Map<String, dynamic> model) => prefix0.Event.fromDbJson(model))
           .toList();
-      if (eventLists.length > 0) {
+      if (eventLists.isNotEmpty) {
         var resultEvent = eventLists[0];
         return resultEvent;
       }
@@ -144,7 +141,7 @@ class EventsQuerys {
       var results =
           await db?.query(DB_TABLE_EVENTS, where: "id = ?", whereArgs: [id]);
       prefix0.Event event = prefix0.Event.fromJson(results!.first);
-      event.startDate = date;
+      event.startDate = DateTime.parse(date);
       return event;
     } catch (e) {
       Utils.debugLog(e);
@@ -164,14 +161,14 @@ class EventsQuerys {
     try {
       // EventsDb.start_date as end_date is added for taking time in conversion_page
       var query =
-          "select EventsDb.title,cache.date as start_date, EventsDb.start_date as end_date, EventsDb.description,EventsDb.calendar_id,EventsDb.id from EventsDb INNER JOIN cache ON EventsDb.id=cache.event_id WHERE cache.date>=? AND cache.date<=? ORDER BY EventsDb.important_event DESC";
+          "select EventsDb.title,Cache.date as start_date, EventsDb.start_date as end_date, EventsDb.description,EventsDb.calendar_id,EventsDb.id from EventsDb INNER JOIN Cache ON EventsDb.id=Cache.event_id WHERE Cache.date>=? AND Cache.date<=? ORDER BY EventsDb.important_event DESC";
       var results = await db?.rawQuery(query, [from, to]);
       List<prefix0.Event> eventLists = results!
           .map((Map model) => prefix0.Event.fromDbJson(model.cast()))
           .toList();
       return eventLists;
     } catch (e) {
-      print(e);
+      Utils.debugLog(e);
     }
     return eventsLists;
   }
@@ -183,16 +180,6 @@ class EventsQuerys {
       event.status = status;
       await db?.update(DB_TABLE_EVENTS, event.toJson(),
           where: "id=?", whereArgs: [event.id]);
-      return true;
-    } catch (e) {
-      return false;
-    }
-  }
-
-  deleteuserEventById(id) async {
-    try {
-      Database? db = await databaseHelper.database;
-      await db?.delete(DB_TABLE_EVENTS, where: 'id=?', whereArgs: [id]);
       return true;
     } catch (e) {
       return false;
@@ -258,6 +245,7 @@ class EventsQuerys {
 
   Future<List<prefix0.Event>> getExpiredNonRepeatingEvents(
       {status = 1, calendarId}) async {
+    await databaseHelper.initializeTimeZone();
     var now = DateTime(
         Timezone().curDateTimeByZone("NPT").year,
         Timezone().curDateTimeByZone("NPT").month,
@@ -286,6 +274,7 @@ class EventsQuerys {
 
   Future<List<prefix0.Event>> getActiveNonRepeatingEvents(
       {status = 1, calendarId}) async {
+    await databaseHelper.initializeTimeZone();
     var now = DateTime(
         Timezone().curDateTimeByZone("NPT").year,
         Timezone().curDateTimeByZone("NPT").month,
@@ -313,6 +302,7 @@ class EventsQuerys {
   }
 
   Future<List<prefix0.Event>> getExpiredEvents({status = 1, calendarId}) async {
+    await databaseHelper.initializeTimeZone();
     var now = DateTime(
         Timezone().curDateTimeByZone("NPT").year,
         Timezone().curDateTimeByZone("NPT").month,
@@ -335,11 +325,11 @@ class EventsQuerys {
           .toIso8601String()}')"
           "GROUP BY id ) ) GROUP BY id";*/
       var query =
-          "Select * from ( SELECT EventsDb.*,cache.date FROM EventsDb INNER JOIN cache on cache.event_id = EventsDb.id "
-          "where cache.date <= '${now.toIso8601String()}' and EventsDb.created_by = '$userId' and status = $status and EventsDb.calendar_id = '$calendarId' "
-          "and ( EventsDb.id not in ( SELECT EventsDb.id FROM EventsDb INNER JOIN cache on cache.event_id = EventsDb.id where "
-          "cache.date >= '${now.toIso8601String()}' and status = $status and EventsDb.calendar_id = '$calendarId' and EventsDb.created_by = '$userId' group by EventsDb.id "
-          " ) ) order by cache.date asc ) group by id order by date desc";
+          "Select * from ( SELECT EventsDb.*,Cache.date FROM EventsDb INNER JOIN Cache on Cache.event_id = EventsDb.id "
+          "where Cache.date <= '${now.toIso8601String()}' and EventsDb.created_by = '$userId' and status = $status and EventsDb.calendar_id = '$calendarId' "
+          "and ( EventsDb.id not in ( SELECT EventsDb.id FROM EventsDb INNER JOIN Cache on Cache.event_id = EventsDb.id where "
+          "Cache.date >= '${now.toIso8601String()}' and status = $status and EventsDb.calendar_id = '$calendarId' and EventsDb.created_by = '$userId' group by EventsDb.id "
+          " ) ) order by Cache.date asc ) group by id order by date desc";
       var results = await db?.rawQuery(query);
       for (var model in results!) {
         prefix0.Event event = prefix0.Event.fromDbJson(model);
@@ -356,6 +346,7 @@ class EventsQuerys {
   }
 
   Future<List<prefix0.Event>> getActiveEvents({status = 1, calendarId}) async {
+    await databaseHelper.initializeTimeZone();
     var now = DateTime(
         Timezone().curDateTimeByZone("NPT").year,
         Timezone().curDateTimeByZone("NPT").month,
@@ -368,8 +359,8 @@ class EventsQuerys {
       Database? db = await databaseHelper.database;
       var userId = await PrefsUtils.getString(PREF_USER_ID, "");
       var query =
-          "Select * from ( SELECT EventsDb.*,cache.date FROM EventsDb INNER JOIN cache on cache.event_id = EventsDb.id where cache.date >= '${now.toIso8601String()}' and EventsDb.created_by = '$userId'"
-          "and EventsDb.status = $status and EventsDb.calendar_id = '$calendarId' order by cache.date desc) group by id order by date asc";
+          "Select * from ( SELECT EventsDb.*,Cache.date FROM EventsDb INNER JOIN Cache on Cache.event_id = EventsDb.id where Cache.date >= '${now.toIso8601String()}' and EventsDb.created_by = '$userId'"
+          "and EventsDb.status = $status and EventsDb.calendar_id = '$calendarId' order by Cache.date desc) group by id order by date asc";
       var results = await db?.rawQuery(query);
       for (var model in results!) {
         prefix0.Event event = prefix0.Event.fromDbJson(model);
@@ -437,7 +428,7 @@ class EventsQuerys {
       {isBackground = true}) async {
     try {
       Database? db = await databaseHelper.database;
-      var calendarExceptionsLIsts = await getDisabledCalendars();
+      var calendarExceptionsLIsts = await databaseHelper.getDisabledCalendars();
       var query =
           "SELECT * FROM $DB_TABLE_EVENTS WHERE ( rrule IS  NULL OR TRIM(rrule,'') = '') AND start_date >='$startDate' AND start_date<='$endDate'"
           "AND status=1 AND calendar_id NOT IN ($calendarExceptionsLIsts) ORDER BY start_date ASC";
@@ -453,25 +444,178 @@ class EventsQuerys {
     return null;
   }
 
-  Future<String> getDisabledCalendars() async {
+  Future<List<prefix0.Event>> loadHomeevents(hasLimit) async {
     try {
       Database? db = await databaseHelper.database;
-      var disabledCalendarBuffer = StringBuffer();
-      var userId = await PrefsUtils.getString(PREF_USER_ID, "");
-      var results = await db?.query(DB_TABLE_CALENDAR,
-          where: "display=0 OR status=2 OR created_by != '$userId'");
-      var disabledCalendars =
-          results?.map((Map model) => Calendar.fromJson(model.cast())).toList();
-      for (Calendar c in disabledCalendars!) {
-        disabledCalendarBuffer.write("\'${c.calendar_id}\',");
-      }
-      var disabledCalendarsid = disabledCalendarBuffer.toString();
-      var result =
-          disabledCalendarsid.substring(0, disabledCalendarsid.length - 1);
-      return result;
+      var remoteConfig = RemoteConfig.instance;
+      var limit = remoteConfig.getString(TODAY_DISPLAY_LIMIT_IMPE);
+      String limitText = "";
+      if (hasLimit) limitText = " LIMIT $limit ";
+      var query =
+          "SELECT * FROM $DB_TABLE_EVENTS WHERE start_date>date('now') ORDER BY start_date ASC $limitText";
+      var results = await db?.rawQuery(query);
+      List<prefix0.Event> eventLists = results!
+          .map((Map model) => prefix0.Event.fromDbJson(model.cast()))
+          .toList();
+      return eventLists;
     } catch (e) {
       Utils.debugLog(e);
     }
-    return "";
+    return [];
+  }
+
+  Future<List<prefix0.Event>> getRepetitionEventsforMonth(startDate, endDate,
+      {preCalendarId = "", isBackground = true}) async {
+    try {
+      Database? db = await databaseHelper.database;
+      List<prefix0.Event> tempEventsLists = [];
+      List<dynamic> repetitionDates = [];
+      var calendarIds = await databaseHelper.getEnabledCalendars();
+      if (preCalendarId.toString().isNotEmpty) calendarIds = preCalendarId;
+
+//      var now = Timezone().curDateTimeByZone("NPT");
+      var query =
+          "SELECT * FROM $DB_TABLE_EVENTS WHERE rrule IS NOT NULL AND TRIM(rrule,' ') != '' "
+          "AND calendar_id IN ($calendarIds) AND recurring_end_date>='$startDate' AND status != 0 ORDER BY start_date ASC";
+//      var query =
+//          "SELECT * FROM $DB_TABLE_EVENTS WHERE rrule IS NOT NULL AND TRIM(rrule,' ') != '' "
+//          "AND calendar_id IN ($calendarIds) AND recurring_end_date>='$now' ORDER BY start_date ASC";
+
+      var results = await db!.rawQuery(query);
+      var events = isBackground
+          ? await compute(prefix0.eventsFromJson, results)
+          : prefix0.eventsFromJson(results);
+      tempEventsLists = [];
+//      int i = 0;
+//      print("total size ${events.length}");
+      for (prefix0.Event eventItem in events) {
+        try {
+//        i++;
+          var rrule = eventItem.rrule;
+          var eventId = eventItem.id;
+          List<Map<String, dynamic>> exceptionsLists = await db.query(
+              DB_TABLE_EVENTS_EXCEPTION,
+              where: "event_id=?",
+              whereArgs: [eventId]);
+          var baseEventDate = eventItem.startDate;
+          var eventRepetitionType =
+              CalendarUtils.getEventRepetitionType(eventItem.basedOn);
+          RecurrenceRuleHelper helper = RecurrenceRuleHelper(rrule.toString(),
+              baseEventDate, startDate, endDate, eventRepetitionType);
+          repetitionDates = helper.calculateEvents();
+          if (repetitionDates == null) {
+            repetitionDates = [];
+          }
+          if (exceptionsLists == null) exceptionsLists = [];
+
+          if (exceptionsLists.isNotEmpty) {
+            for (int i = 0; i < repetitionDates.length; i++) {
+              DateTime time = DateTime(repetitionDates[i].year,
+                  repetitionDates[i].month, repetitionDates[i].day, 0, 0, 0);
+              List<Map<String, dynamic>> expTime =
+                  exceptionsLists.where((var d) {
+                DateTime dateTime =
+                    CalendarUtils.getCalendarFromString(d["exception_date"]);
+                DateTime dTime = DateTime(
+                    dateTime.year, dateTime.month, dateTime.day, 0, 0, 0);
+                if (dTime.toIso8601String() == time.toIso8601String()) {
+                  return true;
+                } else {
+                  return false;
+                }
+              }).toList();
+              if (expTime.isEmpty) {
+                prefix0.Event event =
+                    prefix0.Event.fromDbJson(eventItem.toJson());
+                event.startDate = time;
+                event.endDate = time;
+                event.parentEventId = eventId;
+//              if (eventItem.startDate != time) {
+                tempEventsLists.add(event);
+//              }
+              } else {
+                EventExceptionModel eventExceptionModel =
+                    EventExceptionModel.fromJson(expTime[0]);
+                if (eventExceptionModel.newDate != null) {
+                  prefix0.Event event =
+                      prefix0.Event.fromDbJson(eventItem.toJson());
+                  event.startDate = eventExceptionModel.newDate;
+                  event.endDate = eventExceptionModel.newDate;
+                  event.parentEventId = eventId;
+//              if (eventItem.startDate != time) {
+                  tempEventsLists.add(event);
+                }
+              }
+            }
+          } else {
+            for (int j = 0; j < repetitionDates.length; j++) {
+              DateTime time = repetitionDates[j];
+              if (time.isAfter(startDate) ||
+                  CalendarUtils.getDayDiff(startDate, time) == 0) {
+                prefix0.Event repetitionEvent =
+                    prefix0.Event.fromDbJson(eventItem.toJson());
+                prefix0.Event event = repetitionEvent;
+                event.startDate = time;
+                event.endDate = time;
+                event.parentEventId = eventId;
+                // print(event);
+                /*if (time != eventItem.startDate)*/
+                tempEventsLists.add(event);
+              }
+            }
+          }
+        } catch (e) {
+          Utils.debugLog(e);
+        }
+        // print("$startDate-->$rrule--->$repetitionDates");
+      }
+      // tempEventsLists.addAll(events);
+      // print(tempEventsLists);
+      return tempEventsLists;
+    } catch (e) {
+      Utils.debugLog("REPETITIONERROR--$e");
+    }
+    Utils.debugLog("REPETITIONRETURNINGNULL");
+    return [];
+  }
+
+  Future<List<prefix0.Event>> getRepeatedEvents(
+      DateTime startDate, DateTime endDate,
+      {impOnly = false, forceDefCal = false, isBackground = true}) async {
+    try {
+      Database? db = await databaseHelper.database;
+      var npCacheManager = NpCacheManager();
+      List<prefix0.Event> repeatedEvents = [];
+
+      //GETS DEFAULT CALENDAR IDS.
+      var defaultCalendarids = await databaseHelper.getEnabledDefaultCalendars(
+          defautlCalendar: true);
+      //FETCHES EVENTS FROM CACHED DATA. IF NOT FOUND GENERATES NEW SET OF CACHE AND THEN RETURNS EVENTS.
+      if (defaultCalendarids.toString().isNotEmpty || forceDefCal) {
+        dynamic defaultCalendarEvents =
+            await npCacheManager.getCachedEventsBetweenDates(startDate, endDate,
+                calendarId: defaultCalendarids,
+                impOnly: impOnly,
+                isBackground: isBackground);
+        repeatedEvents.addAll(defaultCalendarEvents);
+      }
+
+      //GENERATES NORMAL EVENTS USERS' CALENDAR AND OTHER CALENDARS AND USES REPETITION RULE FOR EVENT REPETITION.
+      var calendarids = await databaseHelper.getEnabledDefaultCalendars();
+      if (calendarids.toString().isNotEmpty) {
+        var events = await getRepetitionEventsforMonth(startDate, endDate,
+            preCalendarId: calendarids, isBackground: isBackground);
+        repeatedEvents.addAll(events);
+      }
+
+      return repeatedEvents;
+    } catch (e) {
+      return [];
+    }
+  }
+
+  Future deleteFromTableEvents() async {
+    Database? db = await databaseHelper.database;
+    return await db?.execute('Delete From $DB_TABLE_EVENTS ');
   }
 }

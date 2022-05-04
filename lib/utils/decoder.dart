@@ -13,6 +13,7 @@ class APIResponseDecoder {
     } catch (e) {
       Utils.debugLog(e);
     }
+    return null;
   }
 
   static String decode(ByteData audioByteData) {
